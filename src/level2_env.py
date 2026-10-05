@@ -10,18 +10,17 @@ from image_stats import compute_pair_stats, normalize_stats, N_STATS
 
 MATCHER = "BF"
 RATIO = 0.75
-STEP_SIZES = [500, 1000, -500, None]   # None = STOP; +-100 dropped: proven too weak
-                                        # a signal to ever beat any nonzero step cost
+STEP_SIZES = [500, 1000, -500, None]   # None = STOP
 MAX_STEPS = 15
 DEFAULT_LAMBDA = 0.1
-STEP_PENALTY = 0.01     # lowered: PBRS reward is a genuine utility delta now,
-                        # so the tax only needs to rule out truly useless moves
+STEP_PENALTY = 0.01
 MATCH_NORM = 1000.0
 
 N_PRESETS = len(pu.PRESET_NAMES)
-OBS_DIM = N_STATS + N_PRESETS + 7
-# +7 = requested_n_kp, effective_kp, pool_size, last_acc,
-#      last_inlier_ratio, last_n_matches, step_fraction
+OBS_DIM = N_STATS + N_PRESETS + 11
+# +11 = requested_n_kp, effective_kp, pool_size, last_acc,
+#       last_inlier_ratio, last_n_matches, step_fraction,
+#       delta_acc, delta_utility, is_plateau, gap_from_best
 
 
 class Level2Env(gym.Env):
@@ -50,16 +49,26 @@ class Level2Env(gym.Env):
                              key1=self.key1, key2=self.key2)
         m = evaluate_matches(r["pts1"], r["pts2"], self.H, self.img1.shape)
 
-        self.effective_kp = r["n_kp"]                     # min(requested, pool), from pipeline_utils
-        self.pool_size = min(r["pool_n1"], r["pool_n2"])  # detector's real ceiling for this pair+preset
+        self.effective_kp = r["n_kp"]
+        self.pool_size = min(r["pool_n1"], r["pool_n2"])
         self.last_acc = m["reward_acc"]
         self.last_inlier_ratio = m["ransac_ratio"]
         self.last_n_matches = min(m["n_matches"], MATCH_NORM) / MATCH_NORM
-        self.last_m = m   # cached so STOP can report diagnostics without recomputing
+        self.last_m = m
 
-        cost = self.effective_kp / pu.N_MAX   # charge cost on REAL keypoints used, not phantom requested N
+        cost = self.effective_kp / pu.N_MAX
         self.utility = self.last_acc - self.lam * cost
         return m
+
+    def _update_best(self):
+        """Scoreboard: remember the best (N, utility, metrics) seen THIS
+        episode, regardless of where the agent ends up. This is plain
+        bookkeeping, not something the agent has to learn -- so the final
+        reported result can never be worse than the best point visited."""
+        if self.utility > self.best_utility:
+            self.best_utility = self.utility
+            self.best_n_kp = self.effective_kp
+            self.best_m = self.last_m
 
     def _obs(self):
         onehot = np.zeros(N_PRESETS, dtype=np.float32)
@@ -72,8 +81,24 @@ class Level2Env(gym.Env):
             self.last_inlier_ratio,
             self.last_n_matches,
             self.steps / MAX_STEPS,
+            self.delta_acc,       # did accuracy improve on the LAST step?
+            self.delta_utility,   # did overall utility improve on the LAST step?
+            self.is_plateau,      # 1.0 if the detector's pool is already maxed out
+            self.gap_from_best,   # how far BELOW this episode's own best are we right now? (<=0)
         ], dtype=np.float32)
         return np.concatenate([self._pair_stats, onehot, extra]).astype(np.float32)
+
+    def _init_episode_state(self):
+        """Shared setup after the first _run_and_eval() of an episode."""
+        self.prev_utility = self.utility
+        self.prev_acc = self.last_acc
+        self.delta_acc = 0.0        # no previous step exists yet
+        self.delta_utility = 0.0
+        self.is_plateau = float(self.effective_kp >= self.pool_size)
+        self.best_utility = self.utility
+        self.best_n_kp = self.effective_kp
+        self.best_m = self.last_m
+        self.gap_from_best = 0.0    # current point IS the best so far, by definition
 
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed)
@@ -89,8 +114,8 @@ class Level2Env(gym.Env):
         self.steps = 0
         self._pair_stats = self._stats(seq, k, self.img1, self.img2)
 
-        self._run_and_eval()          # honest baseline: what does N_START actually achieve?
-        self.prev_utility = self.utility
+        self._run_and_eval()
+        self._init_episode_state()
         return self._obs(), {}
 
     def reset_to(self, seq, k, preset):
@@ -103,20 +128,29 @@ class Level2Env(gym.Env):
         self.n_kp = pu.N_START
         self.steps = 0
         self._pair_stats = self._stats(seq, k, self.img1, self.img2)
+
         self._run_and_eval()
-        self.prev_utility = self.utility
+        self._init_episode_state()
         return self._obs(), {}
+
+    def _best_info(self):
+        """What we actually report as 'the answer' -- the best point visited
+        this episode, never just wherever the agent happened to stop."""
+        bm = self.best_m
+        return dict(best_n_kp=self.best_n_kp, best_utility=round(self.best_utility, 4),
+                    best_precision=bm["precision"], best_h_ok=bm["h_ok"],
+                    best_corner_err=bm["corner_err"])
 
     def step(self, action):
         self.steps += 1
         delta = STEP_SIZES[action]
 
-        if delta is None:   # STOP: no recompute, no extra tax -- agent already
-                             # "banked" whatever utility it reached
+        if delta is None:   # STOP: no recompute, no extra tax
             info = dict(n_kp=self.n_kp, preset=self.preset,
                         precision=self.last_m["precision"],
                         h_ok=self.last_m["h_ok"],
                         corner_err=self.last_m["corner_err"])
+            info.update(self._best_info())
             return self._obs(), 0.0, True, False, info
 
         self.n_kp = int(np.clip(self.n_kp + delta, pu.N_MIN, pu.N_MAX))
@@ -125,15 +159,24 @@ class Level2Env(gym.Env):
         truncated = self.steps >= MAX_STEPS
         terminated = False
 
-        # Potential-based shaping: reward = genuine utility gained this step,
-        # minus a small exploration tax. Telescopes to
-        # (final utility - starting utility) - (T-1)*STEP_PENALTY over the episode.
-                # flat per step: RANSAC/matching costs roughly the same regardless of
-        # how big the keypoint jump was, so the tax shouldn't scale with it
-        reward = (self.utility - self.prev_utility) - STEP_PENALTY
-        self.prev_utility = self.utility   # <-- critical: must update every step,
-                                            # or later steps get compared to the
-                                            # wrong baseline (the original reset value)
+        # Give the policy a memory of what its LAST action did, and how far
+        # below its own best result it currently stands.
+        self.delta_acc = self.last_acc - self.prev_acc
+        self.delta_utility = self.utility - self.prev_utility
+        self.is_plateau = float(self.effective_kp >= self.pool_size)
+
+        # Reward stays on the RAW step-to-step delta -- NOT best-to-best.
+        # Rewarding only new bests would make most exploratory steps score
+        # exactly 0, starving PPO of the dense gradient it needs.
+        reward = self.delta_utility - STEP_PENALTY
+        self.prev_utility = self.utility
+        self.prev_acc = self.last_acc
+
+        self._update_best()   # scoreboard update happens AFTER reward is computed,
+                               # using this step's true utility
+        self.gap_from_best = self.utility - self.best_utility   # <= 0 always; 0 if this IS the new best
+
         info = dict(n_kp=self.n_kp, preset=self.preset,
                     precision=m["precision"], h_ok=m["h_ok"], corner_err=m["corner_err"])
+        info.update(self._best_info())
         return self._obs(), reward, terminated, truncated, info

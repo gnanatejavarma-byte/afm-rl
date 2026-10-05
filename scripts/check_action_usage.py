@@ -6,7 +6,7 @@ from tqdm import tqdm
 from stable_baselines3 import PPO
 from level2_env import Level2Env
 
-model = PPO.load("checkpoints/level2_best/best_model.zip")
+model = PPO.load("checkpoints/level2_deltaobs_best/best_model.zip")
 env = Level2Env(split="val", seed=7)
 
 N_EPISODES = 50
