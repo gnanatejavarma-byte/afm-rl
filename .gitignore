@@ -1,6 +1,19 @@
+# Virtual Environments
 .venv/
-data/
-logs/
-checkpoints/
+venv/
+env/
+
+# Python bytecode & cache
 __pycache__/
-*.py[cod]
+*.py[cod]
+*$py.class
+
+# Large Dataset files (16+ GB, share via Cloud/Drive)
+data/
+
+# Local raw run logs / TensorBoard
+logs/
+
+# Operating System files
+.DS_Store
+Thumbs.db
