@@ -9,14 +9,20 @@ from metrics import evaluate_matches
 from hpatches import load_split, load_pair
 from level2_env import Level2Env
 
-MODEL_PATH = "checkpoints/level2_deltaobs_best/best_model.zip"
+MODEL_PATH = "checkpoints/level2_14preset_best/best_model.zip"
 SPLIT = "val"          # switch to "test" for the one-time final run
 
 FIXED_N = {
+    # --- original 11 presets ---
     "ORB": 1000, "SIFT": 2000, "AKAZE": 1000, "BRISK": 2000,
     "FAST+BRIEF": 1000, "KAZE": 4000, "GFTT+BRIEF": 1000,
     "GFTT+SIFT": 1000, "STAR+BRIEF": 100, "ORB+FREAK": 2000,
     "FAST+FREAK": 1000,
+    # --- new presets: update these values after running
+    #     scripts/test_accuracy.py + scripts/pick_fixed_baselines.py ---
+    "XFeat":      1000,  # TODO: update from pick_fixed_baselines.py
+    "ALIKED":     500,  # TODO: update from pick_fixed_baselines.py
+    "ORB+BEBLID": 4000,  # TODO: update from pick_fixed_baselines.py
 }
 MATCHER, RATIO = "BF", 0.75
 

@@ -4,15 +4,114 @@ from functools import lru_cache
 import cv2
 import numpy as np
 from cv_compat import make
-from pathlib import Path 
+from pathlib import Path
 
 # ---- keypoint budget ----------------------------------------------------
 N_MIN, N_START, N_MAX = 100, 500, 4000
 MAX_POOL = 5000          # most candidates we ask any detector for
 POOL_CACHE_SIZE = 128    # (image, preset) pools kept in memory
 
-# preset -> (detector, descriptor, descriptor type)
+# ---- learned preset support (XFeat, ALIKED via kornia) ------------------
+LEARNED_PRESETS = {"XFeat", "ALIKED"}
+
+try:
+    import torch as _torch
+    import kornia.feature as _KF
+    _KORNIA_AVAILABLE = True
+except ImportError:
+    _KORNIA_AVAILABLE = False
+
+# Lazily-loaded kornia model objects — populated on first call
+_LEARNED_MODELS: dict = {}
+
+
+def _get_learned_model(preset: str):
+    """Return the cached kornia model for a learned preset, loading it once."""
+    if not _KORNIA_AVAILABLE:
+        raise ImportError(
+            f"Preset '{preset}' requires kornia and torch. "
+            "Install with: pip install kornia kornia-rs"
+        )
+    if preset not in _LEARNED_MODELS:
+        if preset == "XFeat":
+            # KF.XFeat() plain ctor is randomly initialised in kornia 0.9.x.
+            # from_pretrained() downloads and loads the real checkpoint.
+            model = _KF.XFeat.from_pretrained()
+            model.eval()
+        elif preset == "ALIKED":
+            # KF.ALIKED.from_pretrained confirmed working by user (kornia 0.9.0)
+            model = _KF.ALIKED.from_pretrained("aliked-n16")
+            model.eval()
+        else:
+            raise ValueError(f"Unknown learned preset: {preset}")
+        _LEARNED_MODELS[preset] = model
+    return _LEARNED_MODELS[preset]
+
+
+def _build_learned_pool(img: np.ndarray, preset: str) -> dict:
+    """
+    Run a kornia model on a grayscale image and return a pool dict.
+
+    Pool contract (same as OpenCV path):
+        {"pts":  float32 (M, 2) — (x, y) in original-image pixels, strongest first
+         "desc": float32 (M, D) — matching descriptor for each keypoint}
+
+    Coordinate guarantee: kornia XFeat / ALIKED return coordinates already mapped
+    back to input-tensor pixel dimensions, so no rescaling is needed.
+    """
+    model = _get_learned_model(preset)
+
+    # Grayscale H×W uint8  →  (1, 1, H, W) float32 in [0, 1]
+    img_t = _torch.from_numpy(img.astype(np.float32) / 255.0).unsqueeze(0).unsqueeze(0)
+
+    with _torch.no_grad():
+        if preset == "XFeat":
+            # detectAndCompute → List[Dict]; one dict per batch item.
+            # Keys: "keypoints" (N,2), "descriptors" (N,64), "scores" (N,)
+            out_list = model.detectAndCompute(img_t, top_k=MAX_POOL)
+            r = out_list[0]
+            kpts   = r["keypoints"].cpu().numpy().astype(np.float32)     # (N, 2)
+            desc   = r["descriptors"].cpu().numpy().astype(np.float32)   # (N, 64)
+            scores = r["scores"].cpu().numpy().flatten()                  # (N,)
+
+        elif preset == "ALIKED":
+            # forward() returns a list of ALIKEDFeatures objects (one per batch item).
+            # Each object has direct tensor attributes — do NOT treat as dict.
+            out = model(img_t)
+            r = out[0]                                                  # batch size = 1
+            kpts   = r.keypoints.cpu().numpy().astype(np.float32)      # (N, 2) (x, y)
+            desc   = r.descriptors.cpu().numpy().astype(np.float32)    # (N, D)
+            scores = r.keypoint_scores.cpu().numpy().flatten()         # (N,)
+
+        else:
+            raise ValueError(f"Unknown learned preset: {preset}")
+
+    if len(kpts) == 0:
+        return {"pts": np.zeros((0, 2), np.float32), "desc": None}
+
+    # Sort strongest-first and cap at MAX_POOL (consistent with OpenCV path)
+    order = np.argsort(-scores, kind="stable")[:MAX_POOL]
+    return {"pts": kpts[order], "desc": desc[order]}
+
+
+# ---- BEBLID descriptor size constant ------------------------------------
+def _beblid_256_bits():
+    """Return the BEBLID_SIZE_256_BITS integer constant, tolerating OpenCV naming changes."""
+    xf = getattr(cv2, "xfeatures2d", None)
+    if xf is None:
+        raise AttributeError("cv2.xfeatures2d not found — install opencv-contrib-python")
+    # Try the documented constant name first
+    val = getattr(xf, "BEBLID_SIZE_256_BITS", None)
+    if val is not None:
+        return val
+    # Fallback: internal integer code used by OpenCV source (value = 101)
+    return 101
+
+_BEBLID_NBITS = _beblid_256_bits()
+
+# preset -> (detector_kind, descriptor_kind, descriptor_type)
 PRESETS = {
+    # ---- original 11 presets (unchanged) --------------------------------
     "ORB":        ("ORB",   "ORB",   "binary"),
     "SIFT":       ("SIFT",  "SIFT",  "float"),
     "AKAZE":      ("AKAZE", "AKAZE", "binary"),
@@ -24,9 +123,13 @@ PRESETS = {
     "STAR+BRIEF": ("STAR",  "BRIEF", "binary"),
     "ORB+FREAK":  ("ORB",   "FREAK", "binary"),
     "FAST+FREAK": ("FAST",  "FREAK", "binary"),
+    # ---- new presets (14-preset setup) ----------------------------------
+    "XFeat":      ("XFeat",  "XFeat",  "float"),   # kornia: 64-dim float descriptors
+    "ALIKED":     ("ALIKED", "ALIKED", "float"),   # kornia aliked-n16: float descriptors
+    "ORB+BEBLID": ("ORB",    "BEBLID", "binary"),  # ORB detector + BEBLID 256-bit
 }
 PRESET_NAMES = list(PRESETS)
-VALID_MATCHERS = {"binary": ["BF"], "float": ["BF", "FLANN"]}  # BF = Hamming (binary) or L2 (float)
+VALID_MATCHERS = {"binary": ["BF"], "float": ["BF", "FLANN"]}
 
 
 @lru_cache(maxsize=None)
@@ -47,17 +150,28 @@ def _detector(kind):
 def _descriptor(kind):
     names = {"ORB": "ORB", "SIFT": "SIFT", "AKAZE": "AKAZE", "BRISK": "BRISK",
              "KAZE": "KAZE", "BRIEF": "BriefDescriptorExtractor", "FREAK": "FREAK"}
+    if kind == "BEBLID":
+        # scale_factor=1.0 is the OpenCV recommendation for ORB keypoints
+        return make("BEBLID", scale_factor=1.0, n_bits=_BEBLID_NBITS)
     return make(names[kind])
 
 
 # ---- pools: the expensive, N-independent part ---------------------------
 def _build_pool(img, preset):
-    """Detect, describe ALL candidates, keep survivors sorted strongest-first.
-    Some descriptors drop border keypoints and some reorder them, so we sort
-    again by response AFTER describing (stable sort, keeps descriptors aligned)."""
-    kps = _detector(PRESETS[preset][0]).detect(img, None)
+    """
+    Detect, describe ALL candidates; keep survivors sorted strongest-first.
+
+    For learned presets (XFeat, ALIKED), delegates to _build_learned_pool.
+    For OpenCV presets, uses the existing detector/descriptor pipeline.
+    """
+    if preset in LEARNED_PRESETS:
+        return _build_learned_pool(img, preset)
+
+    # --- OpenCV path (unchanged from original) ---
+    det_kind, desc_kind, _ = PRESETS[preset]
+    kps = _detector(det_kind).detect(img, None)
     kps = sorted(kps, key=lambda k: -k.response)[:MAX_POOL]
-    kps, desc = _descriptor(PRESETS[preset][1]).compute(img, list(kps))
+    kps, desc = _descriptor(desc_kind).compute(img, list(kps))
     if desc is None or len(kps) == 0:
         return {"pts": np.zeros((0, 2), np.float32), "desc": None}
     order = np.argsort([-k.response for k in kps], kind="stable")

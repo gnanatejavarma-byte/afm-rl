@@ -4,7 +4,7 @@ from stable_baselines3 import PPO
 from level2_env import Level2Env
 from hpatches import load_split
 
-MODEL_PATH = "checkpoints/level2_deltaobs_best/best_model.zip"
+MODEL_PATH = "checkpoints/level2_14preset_best/best_model.zip"
 
 model = PPO.load(MODEL_PATH)
 val = load_split()["val"]
@@ -12,7 +12,7 @@ val = load_split()["val"]
 seq_i = [s for s in val if s.startswith("i_")][:2]
 seq_v = [s for s in val if s.startswith("v_")][:2]
 test_seqs = seq_i + seq_v
-presets_to_try = ["SIFT", "ORB", "AKAZE", "STAR+BRIEF"]
+presets_to_try = ["SIFT", "ORB", "AKAZE", "STAR+BRIEF", "XFeat", "ALIKED", "ORB+BEBLID"]
 
 env = Level2Env(split="val", seed=0)
 
