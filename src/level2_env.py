@@ -26,13 +26,16 @@ OBS_DIM = N_STATS + N_PRESETS + 11
 class Level2Env(gym.Env):
     metadata = {"render_modes": []}
 
-    def __init__(self, split="train", lam=DEFAULT_LAMBDA, seed=None, eval_mode=False):
+    def __init__(self, split="train", lam=DEFAULT_LAMBDA, seed=None, eval_mode=False, obs_mode="gt"):
         super().__init__()
         self.split = split
         self.pairs = list_pairs(load_split()[split])
         self.lam = lam
         self.rng = random.Random(seed)
         self.eval_mode = eval_mode
+        if obs_mode not in ("gt", "proxy"):
+            raise ValueError(f"obs_mode must be 'gt' or 'proxy', got {obs_mode}")
+        self.obs_mode = obs_mode
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(OBS_DIM,), dtype=np.float32)
         self._stats_cache = {}
@@ -64,24 +67,46 @@ class Level2Env(gym.Env):
         self.effective_kp = r["n_kp"]
         self.pool_size = min(r["pool_n1"], r["pool_n2"])
         self.last_r = r
-
-        if self.eval_mode:
-            # 100% LABEL-FREE: Zero ground truth is accessed during evaluation rollout
-            m = compute_label_free_proxy(r["pts1"], r["pts2"], self.img1.shape)
-            self.last_acc = m["proxy"]
-            self.last_inlier_ratio = m["inlier_ratio"]
-            self.last_n_matches = min(m["n_matches"], MATCH_NORM) / MATCH_NORM
-            self.last_m = m
-        else:
-            # TRAINING ONLY: Supervised RL with geometric reward
-            m = evaluate_matches(r["pts1"], r["pts2"], self.H, self.img1.shape)
-            self.last_acc = m["reward_acc"]
-            self.last_inlier_ratio = m["ransac_ratio"]
-            self.last_n_matches = min(m["n_matches"], MATCH_NORM) / MATCH_NORM
-            self.last_m = m
-
         cost = self.effective_kp / pu.N_MAX
-        self.utility = self.last_acc - self.lam * cost
+
+        if self.obs_mode == "proxy":
+            # Observation and Scoreboard are 100% computed from unsupervised proxy in BOTH train & eval
+            m_proxy = compute_label_free_proxy(r["pts1"], r["pts2"], self.img1.shape)
+            self.last_acc = m_proxy["proxy"]
+            self.last_inlier_ratio = m_proxy["inlier_ratio"]
+            self.last_n_matches = min(m_proxy["n_matches"], MATCH_NORM) / MATCH_NORM
+            self.last_m = m_proxy
+            self.proxy_utility = self.last_acc - self.lam * cost
+            self.utility = self.proxy_utility
+
+            if not self.eval_mode:
+                # In training mode with obs_mode="proxy": GT is used ONLY to compute the reward utility
+                m_gt = evaluate_matches(r["pts1"], r["pts2"], self.H, self.img1.shape)
+                self.gt_utility = m_gt["reward_acc"] - self.lam * cost
+                m = m_gt
+            else:
+                self.gt_utility = 0.0
+                m = m_proxy
+
+        else: # self.obs_mode == "gt" (exact old behavior)
+            if self.eval_mode:
+                # 100% LABEL-FREE: Zero ground truth is accessed during evaluation rollout
+                m = compute_label_free_proxy(r["pts1"], r["pts2"], self.img1.shape)
+                self.last_acc = m["proxy"]
+                self.last_inlier_ratio = m["inlier_ratio"]
+                self.last_n_matches = min(m["n_matches"], MATCH_NORM) / MATCH_NORM
+                self.last_m = m
+            else:
+                # TRAINING ONLY: Supervised RL with geometric reward
+                m = evaluate_matches(r["pts1"], r["pts2"], self.H, self.img1.shape)
+                self.last_acc = m["reward_acc"]
+                self.last_inlier_ratio = m["ransac_ratio"]
+                self.last_n_matches = min(m["n_matches"], MATCH_NORM) / MATCH_NORM
+                self.last_m = m
+
+            self.utility = self.last_acc - self.lam * cost
+            self.gt_utility = self.utility
+
         return m
 
     def _update_best(self):
@@ -115,6 +140,7 @@ class Level2Env(gym.Env):
         """Shared setup after the first _run_and_eval() of an episode."""
         self.prev_utility = self.utility
         self.prev_acc = self.last_acc
+        self.prev_gt_utility = getattr(self, "gt_utility", self.utility)
         self.delta_acc = 0.0        # no previous step exists yet
         self.delta_utility = 0.0
         self.is_plateau = float(self.effective_kp >= self.pool_size)
@@ -164,9 +190,9 @@ class Level2Env(gym.Env):
         return self._obs(), {}
 
     def _best_info(self):
-        """What we report as 'the answer'. In eval_mode, evaluate_matches is run ONCE
+        """What we report as 'the answer'. In eval_mode (or obs_mode='proxy'), evaluate_matches is run ONCE
         post-hoc on the selected points to record benchmark statistics (AUC, corner_err)."""
-        if self.eval_mode:
+        if self.eval_mode or self.obs_mode == "proxy":
             bm = evaluate_matches(self.best_r["pts1"], self.best_r["pts2"], self.H, self.img1.shape)
             fm = evaluate_matches(self.last_r["pts1"], self.last_r["pts2"], self.H, self.img1.shape)
             return dict(
@@ -200,9 +226,9 @@ class Level2Env(gym.Env):
                 info = dict(n_kp=self.effective_kp, preset=self.preset)
             else:
                 info = dict(n_kp=self.n_kp, preset=self.preset,
-                            precision=self.last_m["precision"],
-                            h_ok=self.last_m["h_ok"],
-                            corner_err=self.last_m["corner_err"])
+                            precision=self.last_m.get("precision", 0.0),
+                            h_ok=self.last_m.get("h_ok", 0.0),
+                            corner_err=self.last_m.get("corner_err", float("inf")))
             info.update(self._best_info())
             return self._obs(), 0.0, True, False, info
 
@@ -219,11 +245,15 @@ class Level2Env(gym.Env):
         self.is_plateau = float(self.effective_kp >= self.pool_size)
 
         # Reward stays on the RAW step-to-step delta -- NOT best-to-best.
-        # Rewarding only new bests would make most exploratory steps score
-        # exactly 0, starving PPO of the dense gradient it needs.
-        reward = self.delta_utility - STEP_PENALTY
+        if self.eval_mode:
+            reward = self.delta_utility - STEP_PENALTY
+        else:
+            delta_gt_u = self.gt_utility - self.prev_gt_utility
+            reward = delta_gt_u - STEP_PENALTY
+
         self.prev_utility = self.utility
         self.prev_acc = self.last_acc
+        self.prev_gt_utility = getattr(self, "gt_utility", self.utility)
 
         self._update_best()   # scoreboard update happens AFTER reward is computed,
                                # using this step's true utility
@@ -231,10 +261,11 @@ class Level2Env(gym.Env):
 
         if self.eval_mode:
             info = dict(n_kp=self.effective_kp, preset=self.preset,
-                        inlier_ratio=m["inlier_ratio"], proxy=m["proxy"])
+                        inlier_ratio=self.last_inlier_ratio, proxy=self.last_acc)
         else:
             info = dict(n_kp=self.n_kp, preset=self.preset,
-                            precision=m["precision"], h_ok=m["h_ok"], corner_err=m["corner_err"])
+                        precision=m.get("precision", 0.0), h_ok=m.get("h_ok", 0.0),
+                        corner_err=m.get("corner_err", float("inf")))
 
         if terminated or truncated:
             self._in_eval_rollout = False  # episode finished

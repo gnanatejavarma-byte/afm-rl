@@ -33,12 +33,12 @@ def auc(errors, tau, n=400):
     recall = np.array([(e < t).mean() for t in ts])
     return float((np.trapezoid(recall, ts) if hasattr(np, 'trapezoid') else np.trapz(recall, ts)) / tau)
 
-def run_benchmark():
-    os.makedirs("logs", exist_ok=True)
+def run_benchmark(output_dir="logs"):
+    os.makedirs(output_dir, exist_ok=True)
     l1_model = PPO.load(L1_MODEL_PATH)
     l2_model = PPO.load(L2_MODEL_PATH)
-    pairs = list_pairs(load_split()[SPLIT])[:3]
-    print(f"Loaded {len(pairs)} test pairs (verification subset) from {SPLIT} split.")
+    pairs = list_pairs(load_split()[SPLIT])
+    print(f"Loaded {len(pairs)} test pairs from {SPLIT} split (17 sequences x 5 pairs).")
 
     env = Level2Env(split=SPLIT, seed=123, eval_mode=True)
 
@@ -102,8 +102,9 @@ def run_benchmark():
             })
 
     df_all = pd.DataFrame(records)
-    df_all.to_csv("logs/honest_all_presets_test.csv", index=False)
-    print("Saved logs/honest_all_presets_test.csv")
+    out_all_path = os.path.join(output_dir, "honest_all_presets_test.csv")
+    df_all.to_csv(out_all_path, index=False)
+    print(f"Saved {out_all_path}")
 
     # Now assemble the comprehensive method comparisons for Table 2 & baselines
     methods_data = []
@@ -274,7 +275,9 @@ def run_benchmark():
     })
 
     df_summary = pd.DataFrame(methods_data)
-    df_summary.to_csv("logs/honest_summary_table.csv", index=False)
+    out_summary_path = os.path.join(output_dir, "honest_summary_table.csv")
+    df_summary.to_csv(out_summary_path, index=False)
+    print(f"Saved {out_summary_path}")
     print("\n" + "=" * 90)
     print("HONEST HPATCHES BENCHMARK RESULTS (100% LABEL-FREE INFERENCE)")
     print("=" * 90)
@@ -282,5 +285,9 @@ def run_benchmark():
     print("=" * 90)
 
 if __name__ == "__main__":
-    run_benchmark()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output-dir", default="logs", help="Directory for output CSVs")
+    args = parser.parse_args()
+    run_benchmark(output_dir=args.output_dir)
 
