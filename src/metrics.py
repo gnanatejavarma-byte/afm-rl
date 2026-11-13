@@ -1,9 +1,16 @@
 import cv2
 import numpy as np
+import hashlib
 
 REPROJ_PX = 3.0    # a match is "correct" if it lands within this many pixels of GT
 CORNER_PX = 3.0    # homography counts as accurate if mean corner error is below this
 REWARD_FALLOFF = 5.0  # controls how fast reward_acc decays with corner error
+
+
+def get_ransac_seed(seq, k, method="default"):
+    """Deterministic 31-bit integer seed derived from (seq, k, method)."""
+    s = f"{seq}_{k}_{method}"
+    return int(hashlib.md5(s.encode("utf-8")).hexdigest()[:8], 16) & 0x7FFFFFFF
 
 
 def _project(H, pts):
@@ -18,7 +25,7 @@ def reward_accuracy(corner_err, falloff=REWARD_FALLOFF):
     return float(np.exp(-corner_err / falloff))
 
 
-def evaluate_matches(pts1, pts2, H_gt, img_shape):
+def evaluate_matches(pts1, pts2, H_gt, img_shape, ransac_seed=None):
     """pts1: matched points in image 1, pts2: their partners in image k,
     H_gt: ground-truth homography image1 -> image k."""
     n = len(pts1)
@@ -35,6 +42,8 @@ def evaluate_matches(pts1, pts2, H_gt, img_shape):
 
     # 2) RANSAC (needs >= 4 matches) + corner error of the estimated homography
     if n >= 4:
+        if ransac_seed is not None:
+            cv2.setRNGSeed(int(ransac_seed) & 0x7FFFFFFF)
         H_est, mask = cv2.findHomography(pts1, pts2, cv2.RANSAC, REPROJ_PX)
         if H_est is not None and mask is not None:
             out["ransac_ratio"] = float(mask.sum()) / n
@@ -50,7 +59,7 @@ def evaluate_matches(pts1, pts2, H_gt, img_shape):
     return out
 
 
-def compute_label_free_proxy(pts1, pts2, img_shape=None):
+def compute_label_free_proxy(pts1, pts2, img_shape=None, ransac_seed=None):
     """
     Computes a 100% label-free proxy score in [0, 1] without ground-truth homography.
     Uses RANSAC inlier count, inlier ratio, and inlier reprojection error.
@@ -67,6 +76,8 @@ def compute_label_free_proxy(pts1, pts2, img_shape=None):
     if n < 4:
         return out
 
+    if ransac_seed is not None:
+        cv2.setRNGSeed(int(ransac_seed) & 0x7FFFFFFF)
     H_est, mask = cv2.findHomography(pts1, pts2, cv2.RANSAC, REPROJ_PX)
     if H_est is None or mask is None:
         return out

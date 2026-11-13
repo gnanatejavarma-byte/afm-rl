@@ -5,7 +5,7 @@ from tqdm import tqdm
 from stable_baselines3 import PPO
 
 import pipeline_utils as pu
-from metrics import evaluate_matches, compute_label_free_proxy
+from metrics import evaluate_matches, compute_label_free_proxy, get_ransac_seed
 from hpatches import load_split, load_pair, list_pairs
 from level1_env import Level1Env
 from level2_env import Level2Env
@@ -61,13 +61,13 @@ def run_benchmark(output_dir="logs", split_file=None):
             # A. Fixed-N Baseline
             t0 = time.perf_counter()
             r_fix = pu.run_pipeline(img1, img2, preset, FIXED_N[preset], key1=(seq, 1), key2=(seq, k))
-            m_fix = evaluate_matches(r_fix["pts1"], r_fix["pts2"], H, img1.shape)
+            m_fix = evaluate_matches(r_fix["pts1"], r_fix["pts2"], H, img1.shape, ransac_seed=get_ransac_seed(seq, k, f"{preset}_fix"))
             t_fix_ms = (time.perf_counter() - t0) * 1000.0
 
             # B. Fixed-4000 Baseline
             t0_4k = time.perf_counter()
             r_4k = pu.run_pipeline(img1, img2, preset, 4000, key1=(seq, 1), key2=(seq, k))
-            m_4k = evaluate_matches(r_4k["pts1"], r_4k["pts2"], H, img1.shape)
+            m_4k = evaluate_matches(r_4k["pts1"], r_4k["pts2"], H, img1.shape, ransac_seed=get_ransac_seed(seq, k, f"{preset}_4k"))
             t_4k_ms = (time.perf_counter() - t0_4k) * 1000.0
 
             # C. Level 2 Adaptive (100% Label-Free Proxy Mode)

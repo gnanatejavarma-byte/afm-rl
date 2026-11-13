@@ -1,3 +1,4 @@
+# DEPRECATED: contains hard-coded results, do not use for paper numbers
 import os
 from pathlib import Path
 import matplotlib

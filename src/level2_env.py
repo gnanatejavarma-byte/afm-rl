@@ -5,7 +5,7 @@ from gymnasium import spaces
 
 from hpatches import load_split, load_pair, list_pairs
 import pipeline_utils as pu
-from metrics import evaluate_matches, compute_label_free_proxy
+from metrics import evaluate_matches, compute_label_free_proxy, get_ransac_seed
 from image_stats import compute_pair_stats, normalize_stats, N_STATS
 
 MATCHER = "BF"
@@ -72,7 +72,8 @@ class Level2Env(gym.Env):
 
         if self.obs_mode == "proxy":
             # Observation and Scoreboard are 100% computed from unsupervised proxy in BOTH train & eval
-            m_proxy = compute_label_free_proxy(r["pts1"], r["pts2"], self.img1.shape)
+            r_seed = get_ransac_seed(self.seq, self.k, f"{self.preset}_step_{self.steps}") if self.eval_mode else None
+            m_proxy = compute_label_free_proxy(r["pts1"], r["pts2"], self.img1.shape, ransac_seed=r_seed)
             self.last_acc = m_proxy["proxy"]
             self.last_inlier_ratio = m_proxy["inlier_ratio"]
             self.last_n_matches = min(m_proxy["n_matches"], MATCH_NORM) / MATCH_NORM
@@ -92,7 +93,8 @@ class Level2Env(gym.Env):
         else: # self.obs_mode == "gt" (exact old behavior)
             if self.eval_mode:
                 # 100% LABEL-FREE: Zero ground truth is accessed during evaluation rollout
-                m = compute_label_free_proxy(r["pts1"], r["pts2"], self.img1.shape)
+                r_seed = get_ransac_seed(self.seq, self.k, f"{self.preset}_step_{self.steps}")
+                m = compute_label_free_proxy(r["pts1"], r["pts2"], self.img1.shape, ransac_seed=r_seed)
                 self.last_acc = m["proxy"]
                 self.last_inlier_ratio = m["inlier_ratio"]
                 self.last_n_matches = min(m["n_matches"], MATCH_NORM) / MATCH_NORM
@@ -194,8 +196,10 @@ class Level2Env(gym.Env):
         """What we report as 'the answer'. In eval_mode (or obs_mode='proxy'), evaluate_matches is run ONCE
         post-hoc on the selected points to record benchmark statistics (AUC, corner_err)."""
         if self.eval_mode or self.obs_mode == "proxy":
-            bm = evaluate_matches(self.best_r["pts1"], self.best_r["pts2"], self.H, self.img1.shape)
-            fm = evaluate_matches(self.last_r["pts1"], self.last_r["pts2"], self.H, self.img1.shape)
+            s_best = get_ransac_seed(self.seq, self.k, f"{self.preset}_score_best") if self.eval_mode else None
+            s_final = get_ransac_seed(self.seq, self.k, f"{self.preset}_score_final") if self.eval_mode else None
+            bm = evaluate_matches(self.best_r["pts1"], self.best_r["pts2"], self.H, self.img1.shape, ransac_seed=s_best)
+            fm = evaluate_matches(self.last_r["pts1"], self.last_r["pts2"], self.H, self.img1.shape, ransac_seed=s_final)
             best_gt_u = float(bm["reward_acc"] - self.lam * (self.best_n_kp / pu.N_MAX))
             final_gt_u = float(fm["reward_acc"] - self.lam * (self.effective_kp / pu.N_MAX))
             return dict(

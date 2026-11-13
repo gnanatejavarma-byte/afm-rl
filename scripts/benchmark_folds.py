@@ -14,7 +14,7 @@ import hpatches
 import pipeline_utils as pu
 from level2_env import Level2Env
 from level1_env import Level1Env
-from metrics import evaluate_matches, CORNER_PX, REPROJ_PX
+from metrics import evaluate_matches, CORNER_PX, REPROJ_PX, get_ransac_seed
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Evaluate AFM-RL models on a specific fold split")
@@ -94,9 +94,11 @@ def run_benchmark_fold(args):
         for preset in pu.PRESET_NAMES:
             obs, info = l2_env.reset_to(seq, k, preset)
             steps = 0
+            actions = []
             cum_kp = l2_env.effective_kp
             while True:
                 act, _ = l2_model.predict(obs, deterministic=True)
+                actions.append(int(act))
                 obs, reward, term, trunc, step_info = l2_env.step(int(act))
                 steps += 1
                 cum_kp += l2_env.effective_kp
@@ -107,6 +109,8 @@ def run_benchmark_fold(args):
                 "step_info": step_info,
                 "steps": steps,
                 "cum_kp": cum_kp,
+                "actions": actions,
+                "first_action": actions[0] if len(actions) > 0 else 3,
             }
 
             # L2-only per preset (Strict STOP)
@@ -115,46 +119,66 @@ def run_benchmark_fold(args):
                 "method": f"{preset}+L2", "preset": preset,
                 "final_kp": step_info["final_n_kp"], "cum_kp": cum_kp, "steps": steps,
                 "corner_err": step_info["final_corner_err"], "success": step_info["final_h_ok"],
+                "first_action": actions[0] if len(actions) > 0 else 3,
+                "actions_str": ";".join(map(str, actions)),
             })
 
             # Fixed-4000 per preset
             r_4k = pu.run_pipeline(img1, img2, preset, 4000, key1=key1, key2=key2)
-            m_4k = evaluate_matches(r_4k["pts1"], r_4k["pts2"], H, img1.shape)
+            m_4k = evaluate_matches(r_4k["pts1"], r_4k["pts2"], H, img1.shape, ransac_seed=get_ransac_seed(seq, k, f"{preset}_4k"))
             rows.append({
                 "fold": args.fold, "split": args.split, "seq": seq, "k": k,
                 "method": f"{preset}+Fixed-4000", "preset": preset,
                 "final_kp": float(r_4k["n_kp"]), "cum_kp": float(r_4k["n_kp"]), "steps": 0,
                 "corner_err": float(m_4k["corner_err"]), "success": float(m_4k["h_ok"]),
+                "first_action": -1, "actions_str": "",
             })
 
         # SIFT Fixed budgets: {500, 1000, 1500, 2000, 3000, 4000}
         for b in [500, 1000, 1500, 2000, 3000, 4000]:
             r_sift = pu.run_pipeline(img1, img2, "SIFT", b, key1=key1, key2=key2)
-            m_sift = evaluate_matches(r_sift["pts1"], r_sift["pts2"], H, img1.shape)
+            m_sift = evaluate_matches(r_sift["pts1"], r_sift["pts2"], H, img1.shape, ransac_seed=get_ransac_seed(seq, k, f"SIFT_{b}"))
             rows.append({
                 "fold": args.fold, "split": args.split, "seq": seq, "k": k,
                 "method": f"SIFT Fixed-{b}", "preset": "SIFT",
                 "final_kp": float(r_sift["n_kp"]), "cum_kp": float(r_sift["n_kp"]), "steps": 0,
                 "corner_err": float(m_sift["corner_err"]), "success": float(m_sift["h_ok"]),
+                "first_action": -1, "actions_str": "",
             })
 
         # Learned Baselines: ALIKED-500, XFeat-1000
         r_al = pu.run_pipeline(img1, img2, "ALIKED", 500, key1=key1, key2=key2)
-        m_al = evaluate_matches(r_al["pts1"], r_al["pts2"], H, img1.shape)
+        m_al = evaluate_matches(r_al["pts1"], r_al["pts2"], H, img1.shape, ransac_seed=get_ransac_seed(seq, k, "ALIKED_500"))
         rows.append({
             "fold": args.fold, "split": args.split, "seq": seq, "k": k,
             "method": "ALIKED-500", "preset": "ALIKED",
             "final_kp": float(r_al["n_kp"]), "cum_kp": float(r_al["n_kp"]), "steps": 0,
             "corner_err": float(m_al["corner_err"]), "success": float(m_al["h_ok"]),
+            "first_action": -1, "actions_str": "",
         })
 
         r_xf = pu.run_pipeline(img1, img2, "XFeat", 1000, key1=key1, key2=key2)
-        m_xf = evaluate_matches(r_xf["pts1"], r_xf["pts2"], H, img1.shape)
+        m_xf = evaluate_matches(r_xf["pts1"], r_xf["pts2"], H, img1.shape, ransac_seed=get_ransac_seed(seq, k, "XFeat_1000"))
         rows.append({
             "fold": args.fold, "split": args.split, "seq": seq, "k": k,
             "method": "XFeat-1000", "preset": "XFeat",
             "final_kp": float(r_xf["n_kp"]), "cum_kp": float(r_xf["n_kp"]), "steps": 0,
             "corner_err": float(m_xf["corner_err"]), "success": float(m_xf["h_ok"]),
+            "first_action": -1, "actions_str": "",
+        })
+
+        # P1: Best Fixed (Fold VAL)
+        # Folds 0, 1 -> ALIKED-4000; Folds 2, 3, 4 -> SIFT-4000
+        val_best_preset = "ALIKED" if args.fold in [0, 1] else "SIFT"
+        val_best_budget = 4000
+        r_val_best = pu.run_pipeline(img1, img2, val_best_preset, val_best_budget, key1=key1, key2=key2)
+        m_val_best = evaluate_matches(r_val_best["pts1"], r_val_best["pts2"], H, img1.shape, ransac_seed=get_ransac_seed(seq, k, f"{val_best_preset}_{val_best_budget}"))
+        rows.append({
+            "fold": args.fold, "split": args.split, "seq": seq, "k": k,
+            "method": "Best Fixed (Fold VAL)", "preset": val_best_preset,
+            "final_kp": float(r_val_best["n_kp"]), "cum_kp": float(r_val_best["n_kp"]), "steps": 0,
+            "corner_err": float(m_val_best["corner_err"]), "success": float(m_val_best["h_ok"]),
+            "first_action": -1, "actions_str": "",
         })
 
         # Full AFM-RL (Level 1 Choice)
@@ -166,6 +190,8 @@ def run_benchmark_fold(args):
             "final_kp": chosen_rollout["step_info"]["final_n_kp"], "cum_kp": chosen_rollout["cum_kp"],
             "steps": chosen_rollout["steps"], "corner_err": chosen_rollout["step_info"]["final_corner_err"],
             "success": chosen_rollout["step_info"]["final_h_ok"],
+            "first_action": chosen_rollout["first_action"],
+            "actions_str": ";".join(map(str, chosen_rollout["actions"])),
         })
         rows.append({
             "fold": args.fold, "split": args.split, "seq": seq, "k": k,
@@ -173,6 +199,29 @@ def run_benchmark_fold(args):
             "final_kp": chosen_rollout["step_info"]["best_n_kp"], "cum_kp": chosen_rollout["cum_kp"],
             "steps": chosen_rollout["steps"], "corner_err": chosen_rollout["step_info"]["best_corner_err"],
             "success": chosen_rollout["step_info"]["best_h_ok"],
+            "first_action": chosen_rollout["first_action"],
+            "actions_str": ";".join(map(str, chosen_rollout["actions"])),
+        })
+
+        # Ablations: L1 Preset + Fixed-500 and Fixed-1000 (No L2)
+        r_l1_500 = pu.run_pipeline(img1, img2, chosen_p, 500, key1=key1, key2=key2)
+        m_l1_500 = evaluate_matches(r_l1_500["pts1"], r_l1_500["pts2"], H, img1.shape, ransac_seed=get_ransac_seed(seq, k, f"{chosen_p}_500"))
+        rows.append({
+            "fold": args.fold, "split": args.split, "seq": seq, "k": k,
+            "method": "L1 Preset + Fixed-500", "preset": chosen_p,
+            "final_kp": float(r_l1_500["n_kp"]), "cum_kp": float(r_l1_500["n_kp"]), "steps": 0,
+            "corner_err": float(m_l1_500["corner_err"]), "success": float(m_l1_500["h_ok"]),
+            "first_action": -1, "actions_str": "",
+        })
+
+        r_l1_1k = pu.run_pipeline(img1, img2, chosen_p, 1000, key1=key1, key2=key2)
+        m_l1_1k = evaluate_matches(r_l1_1k["pts1"], r_l1_1k["pts2"], H, img1.shape, ransac_seed=get_ransac_seed(seq, k, f"{chosen_p}_1000"))
+        rows.append({
+            "fold": args.fold, "split": args.split, "seq": seq, "k": k,
+            "method": "L1 Preset + Fixed-1000", "preset": chosen_p,
+            "final_kp": float(r_l1_1k["n_kp"]), "cum_kp": float(r_l1_1k["n_kp"]), "steps": 0,
+            "corner_err": float(m_l1_1k["corner_err"]), "success": float(m_l1_1k["h_ok"]),
+            "first_action": -1, "actions_str": "",
         })
 
         # SIFT+L2
@@ -183,6 +232,8 @@ def run_benchmark_fold(args):
             "final_kp": sift_rollout["step_info"]["final_n_kp"], "cum_kp": sift_rollout["cum_kp"],
             "steps": sift_rollout["steps"], "corner_err": sift_rollout["step_info"]["final_corner_err"],
             "success": sift_rollout["step_info"]["final_h_ok"],
+            "first_action": sift_rollout["first_action"],
+            "actions_str": ";".join(map(str, sift_rollout["actions"])),
         })
         rows.append({
             "fold": args.fold, "split": args.split, "seq": seq, "k": k,
@@ -190,6 +241,8 @@ def run_benchmark_fold(args):
             "final_kp": sift_rollout["step_info"]["best_n_kp"], "cum_kp": sift_rollout["cum_kp"],
             "steps": sift_rollout["steps"], "corner_err": sift_rollout["step_info"]["best_corner_err"],
             "success": sift_rollout["step_info"]["best_h_ok"],
+            "first_action": sift_rollout["first_action"],
+            "actions_str": ";".join(map(str, sift_rollout["actions"])),
         })
 
         # Oracle Preset (GT chosen minimum corner error under L2)
@@ -201,6 +254,8 @@ def run_benchmark_fold(args):
             "final_kp": oracle_rollout["step_info"]["final_n_kp"], "cum_kp": oracle_rollout["cum_kp"],
             "steps": oracle_rollout["steps"], "corner_err": oracle_rollout["step_info"]["final_corner_err"],
             "success": oracle_rollout["step_info"]["final_h_ok"],
+            "first_action": oracle_rollout["first_action"],
+            "actions_str": ";".join(map(str, oracle_rollout["actions"])),
         })
 
     df_new = pd.DataFrame(rows)

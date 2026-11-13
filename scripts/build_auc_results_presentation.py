@@ -1,3 +1,4 @@
+# DEPRECATED: contains hard-coded results, do not use for paper numbers
 """
 build_auc_results_presentation.py
 
