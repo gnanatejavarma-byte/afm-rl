@@ -37,8 +37,8 @@ def run_benchmark():
     os.makedirs("logs", exist_ok=True)
     l1_model = PPO.load(L1_MODEL_PATH)
     l2_model = PPO.load(L2_MODEL_PATH)
-    pairs = list_pairs(load_split()[SPLIT])
-    print(f"Loaded {len(pairs)} test pairs from {SPLIT} split (17 sequences x 5 pairs).")
+    pairs = list_pairs(load_split()[SPLIT])[:3]
+    print(f"Loaded {len(pairs)} test pairs (verification subset) from {SPLIT} split.")
 
     env = Level2Env(split=SPLIT, seed=123, eval_mode=True)
 

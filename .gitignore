@@ -22,6 +22,12 @@ ARCHITECTURE_EXPLANATION.md
 RESULTS_EXPLANATION.md
 reports/
 
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+paper/images_backup/
+
 # Operating System files
 .DS_Store
 Thumbs.db

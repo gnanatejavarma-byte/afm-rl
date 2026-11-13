@@ -36,6 +36,18 @@ class Level2Env(gym.Env):
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(OBS_DIM,), dtype=np.float32)
         self._stats_cache = {}
+        self._H = None
+        self._in_eval_rollout = False
+
+    @property
+    def H(self):
+        if getattr(self, "_in_eval_rollout", False):
+            raise RuntimeError("CRITICAL LEAK DETECTED: self.H was accessed during an eval_mode episode rollout!")
+        return self._H
+
+    @H.setter
+    def H(self, value):
+        self._H = value
 
     def _stats(self, seq, k, img1, img2):
         key = (seq, k)
@@ -126,6 +138,9 @@ class Level2Env(gym.Env):
         self.steps = 0
         self._pair_stats = self._stats(seq, k, self.img1, self.img2)
 
+        if self.eval_mode:
+            self._in_eval_rollout = True
+
         self._run_and_eval()
         self._init_episode_state()
         return self._obs(), {}
@@ -140,6 +155,9 @@ class Level2Env(gym.Env):
         self.n_kp = pu.N_START
         self.steps = 0
         self._pair_stats = self._stats(seq, k, self.img1, self.img2)
+
+        if self.eval_mode:
+            self._in_eval_rollout = True
 
         self._run_and_eval()
         self._init_episode_state()
@@ -177,6 +195,7 @@ class Level2Env(gym.Env):
         delta = STEP_SIZES[action]
 
         if delta is None:   # STOP: no recompute, no extra tax
+            self._in_eval_rollout = False  # episode finished
             if self.eval_mode:
                 info = dict(n_kp=self.effective_kp, preset=self.preset)
             else:
@@ -215,8 +234,9 @@ class Level2Env(gym.Env):
                         inlier_ratio=m["inlier_ratio"], proxy=m["proxy"])
         else:
             info = dict(n_kp=self.n_kp, preset=self.preset,
-                        precision=m["precision"], h_ok=m["h_ok"], corner_err=m["corner_err"])
+                            precision=m["precision"], h_ok=m["h_ok"], corner_err=m["corner_err"])
 
         if terminated or truncated:
+            self._in_eval_rollout = False  # episode finished
             info.update(self._best_info())
         return self._obs(), reward, terminated, truncated, info

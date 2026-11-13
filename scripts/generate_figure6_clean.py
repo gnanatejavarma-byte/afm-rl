@@ -9,6 +9,7 @@ import numpy as np
 OUT_PATHS = [
     Path("reports/plots/fig6_megadepth_clean.png"),
     Path("paper/images/megadepth_auc20_comparison.png"),
+    Path("images/megadepth_auc20_comparison.png"),
     Path("experiments/final_report/plots/megadepth_auc20_comparison.png")
 ]
 for p in OUT_PATHS:
