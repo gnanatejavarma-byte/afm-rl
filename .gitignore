@@ -16,10 +16,39 @@ data/
 
 # Local raw run logs / TensorBoard / Results / Checkpoints
 logs/
-results/
-checkpoints_v2/
 *tfevents*
 **/logs_backup/
+
+# Default ignore for results, whitelisting specified frozen evidence
+results/*
+!results/phase2c/
+results/phase2c/*
+!results/phase2c/val_pairs.csv
+!results/phase2c/headroom_pairs.csv
+
+!results/phase3/
+results/phase3/*
+!results/phase3/PROTOCOL.md
+!results/phase3/README.md
+!results/phase3/generate_latex_tables.py
+!results/phase3/tables.tex
+!results/phase3/folds_summary_table.csv
+!results/phase3/primary_comparisons_P1_P5.csv
+!results/phase3/ablation_table.csv
+!results/phase3/level1_selection_stats.csv
+!results/phase3/level2_action_stats.csv
+!results/phase3/pareto_plot_data.csv
+!results/phase3/dev_test_retest_agreement.csv
+!results/phase3/dev_oracle_noise_quantification.csv
+!results/phase3/dev_proxy_quality.csv
+!results/phase3/dev_inner_cv_selectors.csv
+!results/phase3/folds_pairs.csv
+!results/phase3/dev_noise_floor_evaluations.csv
+
+results/phase3b/
+
+# Checkpoints ignore (best_model.zip files tracked explicitly in index)
+checkpoints_v2/
 
 # Demo and transient outputs
 demo_output/
