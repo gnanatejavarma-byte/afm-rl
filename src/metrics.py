@@ -48,3 +48,47 @@ def evaluate_matches(pts1, pts2, H_gt, img_shape):
 
     out["reward_acc"] = reward_accuracy(out["corner_err"])
     return out
+
+
+def compute_label_free_proxy(pts1, pts2, img_shape=None):
+    """
+    Computes a 100% label-free proxy score in [0, 1] without ground-truth homography.
+    Uses RANSAC inlier count, inlier ratio, and inlier reprojection error.
+    """
+    n = len(pts1)
+    out = dict(
+        n_matches=n,
+        n_inliers=0,
+        inlier_ratio=0.0,
+        mean_reproj=float("inf"),
+        proxy=0.0,
+        H_est=None,
+    )
+    if n < 4:
+        return out
+
+    H_est, mask = cv2.findHomography(pts1, pts2, cv2.RANSAC, REPROJ_PX)
+    if H_est is None or mask is None:
+        return out
+
+    inl_mask = (mask.ravel() == 1)
+    n_inliers = int(inl_mask.sum())
+    inlier_ratio = n_inliers / n if n > 0 else 0.0
+    out["n_inliers"] = n_inliers
+    out["inlier_ratio"] = inlier_ratio
+    out["H_est"] = H_est
+
+    if n_inliers >= 4:
+        p1_inl = pts1[inl_mask].reshape(-1, 1, 2)
+        p2_proj = cv2.perspectiveTransform(p1_inl, H_est).reshape(-1, 2)
+        reproj_errs = np.linalg.norm(p2_proj - pts2[inl_mask], axis=1)
+        mean_reproj = float(np.mean(reproj_errs))
+        out["mean_reproj"] = mean_reproj
+
+        # Proxy formula: count saturation (up to 120 inliers) * inlier ratio * reproj factor
+        count_sat = min(1.0, n_inliers / 120.0)
+        reproj_factor = float(np.exp(-mean_reproj / 2.0))
+        proxy = count_sat * (0.6 * inlier_ratio + 0.4 * reproj_factor)
+        out["proxy"] = float(np.clip(proxy, 0.0, 1.0))
+
+    return out

@@ -29,18 +29,19 @@ class Level1Env(gym.Env):
     """
     metadata = {"render_modes": []}
 
-    def __init__(self, split="train", l2_model_path=DEFAULT_L2_MODEL_PATH, seed=None):
+    def __init__(self, split="train", l2_model_path=DEFAULT_L2_MODEL_PATH, seed=None, eval_mode=False):
         super().__init__()
         self.split = split
         self.pairs = list_pairs(load_split()[split])
         self.rng = random.Random(seed)
+        self.eval_mode = eval_mode
 
         self.n_presets = len(pu.PRESET_NAMES)
         self.action_space = spaces.Discrete(self.n_presets)
         self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(N_STATS,), dtype=np.float32)
 
         # Level 2 evaluator (frozen)
-        self.l2_env = Level2Env(split=split, seed=seed)
+        self.l2_env = Level2Env(split=split, seed=seed, eval_mode=eval_mode)
         if not os.path.exists(l2_model_path):
             # Fallback to deltaobs if 14preset isn't found
             alt_path = "checkpoints/level2_deltaobs_best/best_model.zip"

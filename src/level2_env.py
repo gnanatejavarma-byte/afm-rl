@@ -5,7 +5,7 @@ from gymnasium import spaces
 
 from hpatches import load_split, load_pair, list_pairs
 import pipeline_utils as pu
-from metrics import evaluate_matches
+from metrics import evaluate_matches, compute_label_free_proxy
 from image_stats import compute_pair_stats, normalize_stats, N_STATS
 
 MATCHER = "BF"
@@ -26,11 +26,13 @@ OBS_DIM = N_STATS + N_PRESETS + 11
 class Level2Env(gym.Env):
     metadata = {"render_modes": []}
 
-    def __init__(self, split="train", lam=DEFAULT_LAMBDA, seed=None):
+    def __init__(self, split="train", lam=DEFAULT_LAMBDA, seed=None, eval_mode=False):
         super().__init__()
+        self.split = split
         self.pairs = list_pairs(load_split()[split])
         self.lam = lam
         self.rng = random.Random(seed)
+        self.eval_mode = eval_mode
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(OBS_DIM,), dtype=np.float32)
         self._stats_cache = {}
@@ -47,14 +49,24 @@ class Level2Env(gym.Env):
         r = pu.run_pipeline(self.img1, self.img2, self.preset, self.n_kp,
                              matcher=MATCHER, ratio=RATIO,
                              key1=self.key1, key2=self.key2)
-        m = evaluate_matches(r["pts1"], r["pts2"], self.H, self.img1.shape)
-
         self.effective_kp = r["n_kp"]
         self.pool_size = min(r["pool_n1"], r["pool_n2"])
-        self.last_acc = m["reward_acc"]
-        self.last_inlier_ratio = m["ransac_ratio"]
-        self.last_n_matches = min(m["n_matches"], MATCH_NORM) / MATCH_NORM
-        self.last_m = m
+        self.last_r = r
+
+        if self.eval_mode:
+            # 100% LABEL-FREE: Zero ground truth is accessed during evaluation rollout
+            m = compute_label_free_proxy(r["pts1"], r["pts2"], self.img1.shape)
+            self.last_acc = m["proxy"]
+            self.last_inlier_ratio = m["inlier_ratio"]
+            self.last_n_matches = min(m["n_matches"], MATCH_NORM) / MATCH_NORM
+            self.last_m = m
+        else:
+            # TRAINING ONLY: Supervised RL with geometric reward
+            m = evaluate_matches(r["pts1"], r["pts2"], self.H, self.img1.shape)
+            self.last_acc = m["reward_acc"]
+            self.last_inlier_ratio = m["ransac_ratio"]
+            self.last_n_matches = min(m["n_matches"], MATCH_NORM) / MATCH_NORM
+            self.last_m = m
 
         cost = self.effective_kp / pu.N_MAX
         self.utility = self.last_acc - self.lam * cost
@@ -62,13 +74,12 @@ class Level2Env(gym.Env):
 
     def _update_best(self):
         """Scoreboard: remember the best (N, utility, metrics) seen THIS
-        episode, regardless of where the agent ends up. This is plain
-        bookkeeping, not something the agent has to learn -- so the final
-        reported result can never be worse than the best point visited."""
+        episode, regardless of where the agent ends up."""
         if self.utility > self.best_utility:
             self.best_utility = self.utility
             self.best_n_kp = self.effective_kp
             self.best_m = self.last_m
+            self.best_r = self.last_r
 
     def _obs(self):
         onehot = np.zeros(N_PRESETS, dtype=np.float32)
@@ -98,6 +109,7 @@ class Level2Env(gym.Env):
         self.best_utility = self.utility
         self.best_n_kp = self.effective_kp
         self.best_m = self.last_m
+        self.best_r = self.last_r
         self.gap_from_best = 0.0    # current point IS the best so far, by definition
 
     def reset(self, *, seed=None, options=None):
@@ -134,22 +146,44 @@ class Level2Env(gym.Env):
         return self._obs(), {}
 
     def _best_info(self):
-        """What we actually report as 'the answer' -- the best point visited
-        this episode, never just wherever the agent happened to stop."""
-        bm = self.best_m
-        return dict(best_n_kp=self.best_n_kp, best_utility=round(self.best_utility, 4),
-                    best_precision=bm["precision"], best_h_ok=bm["h_ok"],
-                    best_corner_err=bm["corner_err"])
+        """What we report as 'the answer'. In eval_mode, evaluate_matches is run ONCE
+        post-hoc on the selected points to record benchmark statistics (AUC, corner_err)."""
+        if self.eval_mode:
+            bm = evaluate_matches(self.best_r["pts1"], self.best_r["pts2"], self.H, self.img1.shape)
+            fm = evaluate_matches(self.last_r["pts1"], self.last_r["pts2"], self.H, self.img1.shape)
+            return dict(
+                best_n_kp=self.best_n_kp,
+                best_utility=round(self.best_utility, 4),
+                best_precision=bm["precision"],
+                best_h_ok=bm["h_ok"],
+                best_corner_err=bm["corner_err"],
+                final_n_kp=self.effective_kp,
+                final_precision=fm["precision"],
+                final_h_ok=fm["h_ok"],
+                final_corner_err=fm["corner_err"],
+            )
+        else:
+            bm = self.best_m
+            return dict(
+                best_n_kp=self.best_n_kp,
+                best_utility=round(self.best_utility, 4),
+                best_precision=bm["precision"],
+                best_h_ok=bm["h_ok"],
+                best_corner_err=bm["corner_err"],
+            )
 
     def step(self, action):
         self.steps += 1
         delta = STEP_SIZES[action]
 
         if delta is None:   # STOP: no recompute, no extra tax
-            info = dict(n_kp=self.n_kp, preset=self.preset,
-                        precision=self.last_m["precision"],
-                        h_ok=self.last_m["h_ok"],
-                        corner_err=self.last_m["corner_err"])
+            if self.eval_mode:
+                info = dict(n_kp=self.effective_kp, preset=self.preset)
+            else:
+                info = dict(n_kp=self.n_kp, preset=self.preset,
+                            precision=self.last_m["precision"],
+                            h_ok=self.last_m["h_ok"],
+                            corner_err=self.last_m["corner_err"])
             info.update(self._best_info())
             return self._obs(), 0.0, True, False, info
 
@@ -176,7 +210,13 @@ class Level2Env(gym.Env):
                                # using this step's true utility
         self.gap_from_best = self.utility - self.best_utility   # <= 0 always; 0 if this IS the new best
 
-        info = dict(n_kp=self.n_kp, preset=self.preset,
-                    precision=m["precision"], h_ok=m["h_ok"], corner_err=m["corner_err"])
-        info.update(self._best_info())
+        if self.eval_mode:
+            info = dict(n_kp=self.effective_kp, preset=self.preset,
+                        inlier_ratio=m["inlier_ratio"], proxy=m["proxy"])
+        else:
+            info = dict(n_kp=self.n_kp, preset=self.preset,
+                        precision=m["precision"], h_ok=m["h_ok"], corner_err=m["corner_err"])
+
+        if terminated or truncated:
+            info.update(self._best_info())
         return self._obs(), reward, terminated, truncated, info
