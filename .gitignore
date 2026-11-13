@@ -7,15 +7,25 @@ env/
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Large Dataset files (16+ GB, share via Cloud/Drive)
 data/
 
-# Local raw run logs / TensorBoard
+# Local raw run logs / TensorBoard / Results
 logs/
+results/
+*tfevents*
+**/logs_backup/
 
 # Demo and transient outputs
 demo_output/
+tmp_*.txt
+tmp_aliked_src.txt
+*.tmp
+*.bak
 
 # Documentation / Reference notes (kept local)
 ARCHITECTURE_EXPLANATION.md
@@ -26,8 +36,30 @@ reports/
 *.aux
 *.log
 *.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.toc
+*.lof
+*.lot
+*.run.xml
+*.bcf
+*-blx.bib
+*.nav
+*.snm
+*.vrb
 paper/images_backup/
 
 # Operating System files
 .DS_Store
 Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# IDEs and Editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+
