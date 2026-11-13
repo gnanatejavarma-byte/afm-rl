@@ -1,0 +1,52 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{Primary Statistical Comparisons (P1--P5) on 5-Fold Pooled Test Set (580 Pairs, 116 Sequences).} Differences are computed as $\Delta = \text{Full AFM-RL} - \text{Baseline}$. 95\% confidence intervals are derived from 10,000 sequence-clustered bootstrap resamples; $p$-values are from exact two-sided McNemar tests on paired binary success indicators.}
+\label{tab:phase3_primary_comparisons}
+\begin{tabular}{llcccccc}
+\toprule
+Label & Baseline Comparison & Full Succ. & Base Succ. & $\Delta$ Succ. [95\% CI] & $\Delta$ AUC@3px [95\% CI] & Final KP (Full / Base) & McNemar $p$ \\
+\midrule
+P1 (Best Fixed on Fold VAL) & Best Fixed (Fold VAL) & 72.41\% & 73.97\% & -1.55\% [-5.34%, +1.90%] & -2.83\% [-5.69%, -0.29%] & 574 / 3155 & 0.356 \\
+P2 (ALIKED-500) & ALIKED-500 & 72.41\% & 72.59\% & -0.17\% [-1.03%, +0.52%] & -0.08\% [-0.56%, +0.38%] & 574 / 498 & 1.000 \\
+P3 (SIFT-2000) & SIFT Fixed-2000 & 72.41\% & 72.76\% & -0.34\% [-4.48%, +3.45%] & -2.23\% [-5.28%, +0.73%] & 574 / 1975 & 0.914 \\
+P4 (SIFT-4000) & SIFT Fixed-4000 & 72.41\% & 72.93\% & -0.52\% [-4.66%, +3.28%] & -4.33\% [-7.32%, -1.56%] & 574 / 3591 & 0.828 \\
+P5 (Oracle Preset Selection) & Oracle Preset Selection & 72.41\% & 84.83\% & -12.41\% [-16.21%, -8.97%] & -13.63\% [-16.15%, -11.38%] & 574 / 1105 & $< 0.001$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Component Ablations on 5-Fold Pooled Test Set (580 Pairs).} Evaluating the impact of hierarchical Level~1 preset selection vs.\ fixed preset baselines, and Level~2 dynamic budgeting vs.\ static allocations.}
+\label{tab:phase3_ablations}
+\begin{tabular}{lcccccc}
+\toprule
+Method & Succ@3px (\%) & AUC@3px (\%) & Final KP & Cum. KP & Mean Steps \\
+\midrule
+ALIKED+L2 & 72.59 $\pm$ 5.67 & 46.78 & 530.7 & 1094.1 & 1.06 \\
+Full AFM-RL (Strict STOP) & 72.41 $\pm$ 5.56 & 46.79 & 573.6 & 1215.4 & 1.12 \\
+L1 Preset + Fixed-1000 & 73.10 $\pm$ 5.29 & 47.38 & 951.4 & 951.4 & 0.00 \\
+L1 Preset + Fixed-500 & 72.24 $\pm$ 5.45 & 46.27 & 498.3 & 498.3 & 0.00 \\
+SIFT+L2 (Strict STOP) & 70.34 $\pm$ 4.08 & 47.17 & 1446.9 & 3803.7 & 2.24 \\
+14-Preset Average + L2 & 57.41 $\pm$ 3.64 & 24.94 & 1248.4 & 3232.9 & 1.94 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Hierarchical Policy Behavioral Audit across Cross-Validation Folds.} Level~1 preset choice distribution and Shannon entropy (bits) alongside Level~2 mean steps and STOP frequency.}
+\label{tab:phase3_behavior}
+\begin{tabular}{lcccccc}
+\toprule
+Fold & ALIKED (\%) & SIFT (\%) & Other (\%) & L1 Entropy (bits) & Mean L2 Steps & First-Action STOP (\%) \\
+\midrule
+0 & 73.9\% & 25.2\% & 0.9\% & 0.88 & 1.28 & 76.5\% \\
+1 & 100.0\% & 0.0\% & 0.0\% & -0.00 & 1.08 & 93.0\% \\
+2 & 100.0\% & 0.0\% & 0.0\% & -0.00 & 1.10 & 89.6\% \\
+3 & 100.0\% & 0.0\% & 0.0\% & -0.00 & 1.04 & 95.7\% \\
+4 & 100.0\% & 0.0\% & 0.0\% & -0.00 & 1.07 & 92.5\% \\
+Pooled & 94.8\% & 5.0\% & 0.2\% & 0.30 & 1.12 & 89.5\% \\
+\bottomrule
+\end{tabular}
+\end{table}
