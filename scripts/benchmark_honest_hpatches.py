@@ -33,14 +33,14 @@ def auc(errors, tau, n=400):
     recall = np.array([(e < t).mean() for t in ts])
     return float((np.trapezoid(recall, ts) if hasattr(np, 'trapezoid') else np.trapz(recall, ts)) / tau)
 
-def run_benchmark(output_dir="logs"):
+def run_benchmark(output_dir="logs", split_file=None):
     os.makedirs(output_dir, exist_ok=True)
     l1_model = PPO.load(L1_MODEL_PATH)
     l2_model = PPO.load(L2_MODEL_PATH)
-    pairs = list_pairs(load_split()[SPLIT])
+    pairs = list_pairs(load_split(split_file)[SPLIT])
     print(f"Loaded {len(pairs)} test pairs from {SPLIT} split (17 sequences x 5 pairs).")
 
-    env = Level2Env(split=SPLIT, seed=123, eval_mode=True)
+    env = Level2Env(split=SPLIT, seed=123, eval_mode=True, split_file=split_file)
 
     records = []
 
@@ -197,7 +197,7 @@ def run_benchmark(output_dir="logs"):
 
     # 8. Full AFM-RL (Level 1 + Level 2, 100% Label-Free Proxy)
     # Extract the rows where preset == chosen Level 1 preset for each pair
-    l1_env = Level1Env(split=SPLIT, seed=123, eval_mode=True)
+    l1_env = Level1Env(split=SPLIT, seed=123, eval_mode=True, split_file=split_file)
     afm_rl_rows = []
     oracle_rows = []
     for seq, k in pairs:
@@ -288,6 +288,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", default="logs", help="Directory for output CSVs")
+    parser.add_argument("--split-file", default=None, help="Path to custom split JSON file")
     args = parser.parse_args()
-    run_benchmark(output_dir=args.output_dir)
+    run_benchmark(output_dir=args.output_dir, split_file=args.split_file)
 

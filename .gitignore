@@ -14,9 +14,10 @@ htmlcov/
 # Large Dataset files (16+ GB, share via Cloud/Drive)
 data/
 
-# Local raw run logs / TensorBoard / Results
+# Local raw run logs / TensorBoard / Results / Checkpoints
 logs/
 results/
+checkpoints_v2/
 *tfevents*
 **/logs_backup/
 

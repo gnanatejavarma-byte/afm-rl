@@ -29,19 +29,21 @@ class Level1Env(gym.Env):
     """
     metadata = {"render_modes": []}
 
-    def __init__(self, split="train", l2_model_path=DEFAULT_L2_MODEL_PATH, seed=None, eval_mode=False):
+    def __init__(self, split="train", l2_model_path=DEFAULT_L2_MODEL_PATH, seed=None, eval_mode=False, obs_mode="gt", split_file=None):
         super().__init__()
         self.split = split
-        self.pairs = list_pairs(load_split()[split])
+        self.split_file = split_file
+        self.pairs = list_pairs(load_split(split_file)[split])
         self.rng = random.Random(seed)
         self.eval_mode = eval_mode
+        self.obs_mode = obs_mode
 
         self.n_presets = len(pu.PRESET_NAMES)
         self.action_space = spaces.Discrete(self.n_presets)
         self.observation_space = spaces.Box(low=-5.0, high=5.0, shape=(N_STATS,), dtype=np.float32)
 
         # Level 2 evaluator (frozen)
-        self.l2_env = Level2Env(split=split, seed=seed, eval_mode=eval_mode)
+        self.l2_env = Level2Env(split=split, seed=seed, eval_mode=eval_mode, obs_mode=obs_mode, split_file=split_file)
         if not os.path.exists(l2_model_path):
             # Fallback to deltaobs if 14preset isn't found
             alt_path = "checkpoints/level2_deltaobs_best/best_model.zip"
@@ -92,7 +94,12 @@ class Level1Env(gym.Env):
                 break
 
         res = {
-            "best_utility": float(info["best_utility"]),
+            "final_gt_utility": float(info["final_gt_utility"]),
+            "best_gt_utility": float(info["best_gt_utility"]),
+            "final_n_kp": int(info["final_n_kp"]),
+            "final_h_ok": float(info["final_h_ok"]),
+            "final_corner_err": float(info["final_corner_err"]),
+            "final_precision": float(info.get("final_precision", 0.0)),
             "best_n_kp": int(info["best_n_kp"]),
             "best_h_ok": float(info["best_h_ok"]),
             "best_corner_err": float(info["best_corner_err"]),
@@ -105,7 +112,9 @@ class Level1Env(gym.Env):
         preset = pu.PRESET_NAMES[action]
         res = self._run_level2(preset)
 
-        reward = res["best_utility"]
+        # Intended design: Level 1 reward is the GT-based utility of the strict-STOP final state
+        # reported by the frozen Level 2 rollout (run with obs_mode="proxy").
+        reward = res["final_gt_utility"]
         terminated = True
         truncated = False
 
@@ -115,9 +124,13 @@ class Level1Env(gym.Env):
             "preset": preset,
             "action": action,
             "reward": reward,
-            "best_utility": res["best_utility"],
+            "final_gt_utility": res["final_gt_utility"],
+            "best_gt_utility": res["best_gt_utility"],
+            "final_n_kp": res["final_n_kp"],
             "best_n_kp": res["best_n_kp"],
+            "final_h_ok": res["final_h_ok"],
             "best_h_ok": res["best_h_ok"],
+            "final_corner_err": res["final_corner_err"],
             "best_corner_err": res["best_corner_err"],
         }
         return self.obs.copy(), reward, terminated, truncated, info

@@ -26,10 +26,11 @@ OBS_DIM = N_STATS + N_PRESETS + 11
 class Level2Env(gym.Env):
     metadata = {"render_modes": []}
 
-    def __init__(self, split="train", lam=DEFAULT_LAMBDA, seed=None, eval_mode=False, obs_mode="gt"):
+    def __init__(self, split="train", lam=DEFAULT_LAMBDA, seed=None, eval_mode=False, obs_mode="gt", split_file=None):
         super().__init__()
         self.split = split
-        self.pairs = list_pairs(load_split()[split])
+        self.split_file = split_file
+        self.pairs = list_pairs(load_split(split_file)[split])
         self.lam = lam
         self.rng = random.Random(seed)
         self.eval_mode = eval_mode
@@ -195,25 +196,39 @@ class Level2Env(gym.Env):
         if self.eval_mode or self.obs_mode == "proxy":
             bm = evaluate_matches(self.best_r["pts1"], self.best_r["pts2"], self.H, self.img1.shape)
             fm = evaluate_matches(self.last_r["pts1"], self.last_r["pts2"], self.H, self.img1.shape)
+            best_gt_u = float(bm["reward_acc"] - self.lam * (self.best_n_kp / pu.N_MAX))
+            final_gt_u = float(fm["reward_acc"] - self.lam * (self.effective_kp / pu.N_MAX))
             return dict(
                 best_n_kp=self.best_n_kp,
-                best_utility=round(self.best_utility, 4),
+                best_utility=round(best_gt_u, 4),
+                best_gt_utility=best_gt_u,
+                best_proxy_utility=round(self.best_utility, 4),
                 best_precision=bm["precision"],
                 best_h_ok=bm["h_ok"],
                 best_corner_err=bm["corner_err"],
                 final_n_kp=self.effective_kp,
+                final_utility=round(final_gt_u, 4),
+                final_gt_utility=final_gt_u,
                 final_precision=fm["precision"],
                 final_h_ok=fm["h_ok"],
                 final_corner_err=fm["corner_err"],
             )
         else:
             bm = self.best_m
+            fm = self.last_m
             return dict(
                 best_n_kp=self.best_n_kp,
                 best_utility=round(self.best_utility, 4),
-                best_precision=bm["precision"],
-                best_h_ok=bm["h_ok"],
-                best_corner_err=bm["corner_err"],
+                best_gt_utility=float(self.best_utility),
+                best_precision=bm.get("precision", 0.0),
+                best_h_ok=bm.get("h_ok", 0.0),
+                best_corner_err=bm.get("corner_err", float("inf")),
+                final_n_kp=self.effective_kp,
+                final_utility=round(self.utility, 4),
+                final_gt_utility=float(self.utility),
+                final_precision=fm.get("precision", 0.0),
+                final_h_ok=fm.get("h_ok", 0.0),
+                final_corner_err=fm.get("corner_err", float("inf")),
             )
 
     def step(self, action):

@@ -14,8 +14,9 @@ def _index():
     return {p.name: p for p in DATA.rglob("*")
             if p.is_dir() and p.name[:2] in ("i_", "v_")}
 
-def load_split():
-    return json.loads(SPLIT.read_text())
+def load_split(split_file=None):
+    p = Path(split_file) if split_file else SPLIT
+    return json.loads(p.read_text())
 
 def list_pairs(seq_names):
     """Every (sequence, k) pair: reference image 1 vs image k, k=2..6."""
