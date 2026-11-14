@@ -109,3 +109,4 @@ print("Saved results/phase5/g_image_reconciliation.csv")
 print(df_recon[["category", "count", "explanation"]].to_string(index=False))
 
 print("\n=== SECTION G RECONCILIATION COMPLETE ===")
+

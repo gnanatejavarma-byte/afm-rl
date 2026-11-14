@@ -57,3 +57,4 @@ df = pd.DataFrame(records)
 df.to_csv("results/phase5/a1_env_action_comparison.csv", index=False)
 print("=== A.1 DIRECT ENV CALLS COMPARISON TABLE ===")
 print(df.to_string(index=False))
+

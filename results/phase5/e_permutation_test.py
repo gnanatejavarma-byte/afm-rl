@@ -21,13 +21,21 @@ perm_seeds = [42, 123, 999]
 test_pairs_50 = pairs[:50]
 
 scene_cache = {}
+img_cache = {}
+
+def get_image_K(fname, k):
+    key = (fname, k)
+    if key not in img_cache:
+        _, K = md.load_image(fname, k)
+        img_cache[key] = K
+    return img_cache[key]
 
 def get_scene_data(fname, i, j):
     if fname not in scene_cache:
         scene_cache[fname] = md._scene(fname)
     sc = scene_cache[fname]
-    K0 = sc["intrinsics"][i]
-    K1 = sc["intrinsics"][j]
+    K0 = get_image_K(fname, i)
+    K1 = get_image_K(fname, j)
     T_gt = sc["poses"][j] @ np.linalg.inv(sc["poses"][i])
     return K0, K1, T_gt
 

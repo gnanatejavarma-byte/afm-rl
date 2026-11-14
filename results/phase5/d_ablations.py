@@ -138,3 +138,4 @@ print("\n=== ABLATIONS SUMMARY (POOLED) ===")
 print(df_abl[df_abl["scene"] == "Pooled"].to_string(index=False))
 
 print("\n=== SECTION D COMPLETE ===")
+

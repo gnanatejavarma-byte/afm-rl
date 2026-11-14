@@ -1,7 +1,5 @@
 import os
 import sys
-import json
-import hashlib
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -12,30 +10,25 @@ import hpatches
 import megadepth as md
 import pipeline_utils as pu
 from level2_env import Level2Env, load_split
-from megadepth_eval_env import MegaDepthEvalEnv, POOL_CACHE_DIR, STATS_CACHE_DIR
+from megadepth_eval_env import MegaDepthEvalEnv
 from image_stats import compute_pair_stats, normalize_stats
 
 OUTPUT_DIR = Path("results/phase5")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-print("=== RUNNING SECTION A DIAGNOSTICS ===")
-
 # -------------------------------------------------------------
 # A.2 OBSERVATION SHIFT ANALYSIS
 # -------------------------------------------------------------
-print("\n--- A.2 Observation Shift Analysis ---")
+print("Running A.2 Observation Shift Analysis...")
 
-# Load L1 and L2 models for fold 0
+# Load models for fold 0
 l1_m0 = PPO.load("checkpoints_v2/fold0/level1_best/best_model.zip")
-l2_m0 = PPO.load("checkpoints_v2/fold0/level2_14preset_best/best_model.zip")
 
 # 1. HPatches Fold 0 Test Pairs Step 0 Observations
-with open("configs/folds/fold0.json", "r") as f:
-    fold0_split = json.load(f)
-
-hp_test_pairs = []
-for seq in fold0_split["test"]:
-    for k in range(2, 7):
+split_data = load_split(None)
+hp_test_pairs = list_pairs = []
+for seq, pairs in split_data["test"].items():
+    for k in pairs:
         hp_test_pairs.append((seq, k))
 
 print(f"HPatches Fold 0 test pairs: {len(hp_test_pairs)}")
@@ -51,92 +44,26 @@ for seq, k in hp_test_pairs:
     obs, _ = hp_env.reset_to(seq, k, preset)
     hp_obs_list.append(obs)
 
-hp_obs_arr = np.array(hp_obs_list)  # (115, 34)
-print(f"Computed HPatches Step 0 obs array: {hp_obs_arr.shape}")
+hp_obs_arr = np.array(hp_obs_list)  # (N_hp, 34)
 
 # 2. MegaDepth Step 0 Observations across all 1500 pairs
 md_pairs = md.list_pairs()
 print(f"MegaDepth test pairs: {len(md_pairs)}")
 
-# We can pre-load pool sizes for ALIKED and SIFT
-def get_cached_pool_size(scene_d, img_idx, preset):
-    p = str(scene_d["image_paths"][img_idx])
-    param_str = f"nfeatures=4000_preset={preset}"
-    key_str = f"{p}_{preset}_{param_str}"
-    h = hashlib.sha256(key_str.encode("utf-8")).hexdigest()
-    cache_file = Path("data/pool_cache_megadepth") / preset / f"{h}.npz"
-    if cache_file.exists():
-        data = np.load(cache_file)
-        return len(data["pts"])
-    return 4000
-
-# Pre-load stage2a evaluations for N=500 lookups
-df2a = pd.read_csv("results/phase4b/megadepth_stage2a_priority_evaluations.csv")
-df2a_500 = df2a[df2a["N"] == 500].set_index(["fname", "i", "j", "preset"])
-
-df_s3 = pd.read_csv("results/phase4b/megadepth_stage3_afm_rl_rollouts.csv")
-df_s3_fold0 = df_s3[df_s3["fold"] == 0].set_index(["fname", "i", "j"])
-
+md_env = MegaDepthEvalEnv(eval_mode=True)
 md_obs_list = []
-scene_cache = {}
 
 for fname, i, j in md_pairs:
-    if fname not in scene_cache:
-        scene_cache[fname] = md._scene(fname)
-    sc = scene_cache[fname]
-    
-    # Pair stats from disk cache
-    stat_file = Path("data/megadepth/stats_cache") / f"{fname}__{i}__{j}.npy"
-    if stat_file.exists():
-        st = np.load(stat_file)
-    else:
-        img0, img1, _, _, _ = md.load_pair(fname, i, j)
-        st = normalize_stats(compute_pair_stats(img0, img1))
-        
-    # Get chosen preset from stage 3 fold 0
-    row_s3 = df_s3_fold0.loc[(fname, i, j)]
-    preset = row_s3["chosen_preset"]
-    preset_idx = pu.PRESET_NAMES.index(preset)
-    
-    # One-hot
-    one_hot = np.zeros(len(pu.PRESET_NAMES), dtype=np.float32)
-    one_hot[preset_idx] = 1.0
-    
-    # Get N=500 results
-    row_eval = df2a_500.loc[(fname, i, j, preset)]
-    p_epi = float(row_eval["p_epi"])
-    inlier_ratio = float(row_eval["inlier_ratio"])
-    n_matches = float(row_eval["n_matches"])
-    actual_kp = float(row_eval["actual_kp"])
-    
-    # Pool size
-    pool1 = get_cached_pool_size(sc, i, preset)
-    pool2 = get_cached_pool_size(sc, j, preset)
-    pool_size = float(min(pool1, pool2))
-    
-    budget_norm = float(500 / pu.N_MAX)
-    effective_norm = float(actual_kp / pu.N_MAX)
-    pool_norm = float(pool_size / pu.N_MAX)
-    step_norm = 0.0
-    delta_proxy = p_epi
-    delta_ratio = inlier_ratio
-    delta_matches = float(n_matches / 200.0)
-    norm_matches = float(n_matches / 200.0)
-    
-    # As constructed by MegaDepthEvalEnv._get_obs()
-    extra = np.array([
-        budget_norm, effective_norm, pool_norm, step_norm,
-        p_epi, delta_proxy, inlier_ratio, delta_ratio,
-        norm_matches, delta_matches, 0.0
-    ], dtype=np.float32)
-    
-    obs = np.concatenate([st, one_hot, extra]).astype(np.float32)[:34]
+    img0, img1, _, _, _ = md.load_pair(fname, i, j)
+    st = md_env._stats(fname, i, j, img0, img1)
+    a_l1, _ = l1_m0.predict(st, deterministic=True)
+    preset = pu.PRESET_NAMES[int(a_l1)]
+    obs, _ = md_env.reset_to(fname, i, j, preset)
     md_obs_list.append(obs)
 
 md_obs_arr = np.array(md_obs_list)  # (1500, 34)
-print(f"Computed MegaDepth Step 0 obs array: {md_obs_arr.shape}")
 
-# Dimension names matching the concatenated 34-dim vector
+# Dimension names
 dim_names = [
     "stat_0_avg_texture", "stat_1_tex_change", "stat_2_avg_blur", "stat_3_blur_change",
     "stat_4_avg_corner_density", "stat_5_corner_change", "stat_6_avg_grad_mag", "stat_7_grad_spread",
@@ -145,11 +72,9 @@ dim_names = [
 for p in pu.PRESET_NAMES:
     dim_names.append(f"onehot_{p}")
 dim_names.extend([
-    "env_dim_23_budget_norm", "env_dim_24_effective_norm", "env_dim_25_pool_norm",
-    "env_dim_26_step_norm_vs_last_acc", "env_dim_27_last_proxy_vs_inlier_ratio",
-    "env_dim_28_delta_proxy_vs_n_matches", "env_dim_29_inlier_ratio_vs_step_norm",
-    "env_dim_30_delta_ratio_vs_delta_acc", "env_dim_31_n_matches_vs_delta_utility",
-    "env_dim_32_delta_matches_vs_is_plateau", "env_dim_33_placeholder_vs_gap_from_best"
+    "feat_budget_norm", "feat_effective_norm", "feat_pool_norm", "feat_proxy_acc",
+    "feat_inlier_ratio", "feat_n_matches_norm", "feat_step_norm", "feat_delta_acc",
+    "feat_delta_utility", "feat_is_plateau", "feat_gap_from_best"
 ])
 
 obs_records = []
@@ -191,16 +116,16 @@ for d in range(34):
 df_obs = pd.DataFrame(obs_records)
 df_obs.to_csv("results/phase5/a2_observation_shift_summary.csv", index=False)
 print("Saved results/phase5/a2_observation_shift_summary.csv")
-
-print("\nDimensions shifted by > 3 HP-std:")
-print(df_obs[df_obs["shifted_gt_3std"]][["dim_idx", "name", "hp_mean", "md_mean", "z_shift", "clip_frac_md"]].to_string(index=False))
+print("\nFlagged dimensions shifted by > 3 HP-std:")
+print(df_obs[df_obs["shifted_gt_3std"]][["dim_idx", "name", "hp_mean", "md_mean", "z_shift"]].to_string(index=False))
 
 # -------------------------------------------------------------
-# A.3 ROLLOUT DIAGNOSTICS
+# A.3 ROLLOUT DIAGNOSTICS & ACTION MAPPING ROOT CAUSE
 # -------------------------------------------------------------
-print("\n--- A.3 Rollout Diagnostics ---")
+print("\nRunning A.3 Rollout Diagnostics...")
 df_stage3 = pd.read_csv("results/phase4b/megadepth_stage3_afm_rl_rollouts.csv")
 
+# Parse actions from string
 import ast
 all_actions = []
 fold_action_counts = {}
@@ -222,6 +147,7 @@ print("\nOverall MegaDepth Stage 3 Action Distribution:")
 for a in range(4):
     print(f"Action {a}: {act_hist[a]} ({act_hist_pct[a]:.2f}%)")
 
+# Diagnostics summary table
 diag_records = []
 for fold, group in df_stage3.groupby("fold"):
     c = fold_action_counts[fold]
@@ -245,44 +171,79 @@ for fold, group in df_stage3.groupby("fold"):
 
 df_diag = pd.DataFrame(diag_records)
 df_diag.to_csv("results/phase5/a3_rollout_diagnostics.csv", index=False)
-print("Saved results/phase5/a3_rollout_diagnostics.csv")
+print("\n=== A.3 ROLLOUT DIAGNOSTICS SUMMARY ===")
 print(df_diag.to_string(index=False))
 
-# Now test on 100 pairs what happens if Action 3 is interpreted as STOP (Level2Env semantics)
-print("\n--- Testing Native Level2Env Semantics (Action 3 = STOP) on 100 Pairs ---")
+# Now, test the SAME 5 fold models with CORRECT Level2Env action semantics:
+# In Level2Env: Action 3 is STOP, Action 0 is +500, Action 1 is +1000, Action 2 is -500.
+# Let's run a test on the first 100 MegaDepth pairs using Level2Env action semantics!
+print("\nTesting MegaDepth rollouts under Level2Env native action semantics (Action 3 = STOP)...")
 native_records = []
 for fold in range(5):
     l1_m = PPO.load(f"checkpoints_v2/fold{fold}/level1_best/best_model.zip")
     l2_m = PPO.load(f"checkpoints_v2/fold{fold}/level2_14preset_best/best_model.zip")
     
+    # We will simulate rollouts where the environment obeys Level2Env semantics
+    # If policy outputs action 3 -> it stops!
+    # If policy outputs 0 -> +500
+    # If policy outputs 1 -> +1000
+    # If policy outputs 2 -> -500
     steps_list = []
+    final_n_list = []
+    cum_kp_list = []
     actions_taken = []
     
-    for idx, (fname, i, j) in enumerate(md_pairs[:100]):
-        obs = md_obs_arr[idx] # Step 0 obs
-        # Policy predicts on step 0 obs
-        act, _ = l2_m.predict(obs, deterministic=True)
-        act = int(act)
-        actions_taken.append(act)
-        if act == 3: # In Level2Env, 3 is STOP
-            steps_list.append(1)
-        else:
-            steps_list.append(2) # Would continue
+    for fname, i, j in md_pairs[:100]:
+        img0, img1, _, _, _ = md.load_pair(fname, i, j)
+        st = md_env._stats(fname, i, j, img0, img1)
+        a_l1, _ = l1_m.predict(st, deterministic=True)
+        preset = pu.PRESET_NAMES[int(a_l1)]
+        
+        obs, info = md_env.reset_to(fname, i, j, preset)
+        steps = 0
+        done = False
+        rollout_acts = []
+        
+        while not done:
+            action_l2, _ = l2_m.predict(obs, deterministic=True)
+            act = int(action_l2)
+            rollout_acts.append(act)
+            steps += 1
             
-    c3 = actions_taken.count(3)
-    tot = len(actions_taken)
+            # If native Level2Env semantics:
+            if act == 3: # STOP
+                done = True
+                break
+            elif act == 0:
+                md_env.n_kp = min(pu.N_MAX, md_env.n_kp + 500)
+            elif act == 1:
+                md_env.n_kp = min(pu.N_MAX, md_env.n_kp + 1000)
+            elif act == 2:
+                md_env.n_kp = max(pu.N_MIN, md_env.n_kp - 500)
+                
+            if steps >= 15: # Level2Env training max_steps
+                done = True
+                break
+                
+            md_env._run_and_eval()
+            obs = md_env._get_obs()
+            
+        steps_list.append(steps)
+        final_n_list.append(md_env.n_kp)
+        actions_taken.extend(rollout_acts)
+        
     native_records.append({
         "fold": fold,
-        "n_pairs": 100,
-        "action3_stop_count": c3,
-        "pct_action3": (c3 / tot) * 100.0,
-        "pct_stopped_immediately_step1": (c3 / tot) * 100.0,
-        "mean_steps_if_3_is_stop": float(np.mean(steps_list))
+        "mean_steps_native": float(np.mean(steps_list)),
+        "mean_final_N_native": float(np.mean(final_n_list)),
+        "pct_stopped_step1": float(np.mean([s == 1 for s in steps_list])) * 100.0,
+        "action3_stop_count": actions_taken.count(3),
+        "total_actions": len(actions_taken),
+        "pct_action3": (actions_taken.count(3) / len(actions_taken)) * 100.0
     })
 
 df_native = pd.DataFrame(native_records)
 df_native.to_csv("results/phase5/a3_native_semantics_test_100pairs.csv", index=False)
-print("Saved results/phase5/a3_native_semantics_test_100pairs.csv")
+print("\n=== A.3 NATIVE LEVEL2ENV ACTION SEMANTICS ON MEGADEPTH (100 PAIRS) ===")
 print(df_native.to_string(index=False))
 
-print("\n=== SECTION A DIAGNOSTICS COMPLETE ===")
