@@ -136,3 +136,4 @@ During evaluation and agent rollouts, ground-truth pose $T_{\text{gt}}$ is **str
 * **Cluster Unit:** In MegaDepth, pairs within a scene share images (e.g. 600 pairs share 328 images in 0015; co-visibility graph forms a single dominant giant component). Pairs are clustered by reference image $I_0$ (anchor view), yielding 328 clusters in 0015 and 478 clusters in 0022.
 * **Bootstrap:** $B = 10,000$ cluster-level resamples for 95% percentile confidence intervals.
 * **Permutation Robustness:** Primary results report original match ordering; 3 correspondence permutations evaluated as a sensitivity check.
+

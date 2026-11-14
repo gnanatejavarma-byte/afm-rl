@@ -1,0 +1,8 @@
+category,scope,count,source_path,explanation
+Images physically on disk,data/megadepth (raw image files),806,data/megadepth/megadepth_test_1500/*/*/*.jpg,"Exact image files stored in scene subdirectories (328 in 0015, 478 in 0022)."
+"Unique images referenced by 1,500 pairs (Pooled)","All 1,500 test pairs",806,data/megadepth/megadepth_test_1500/*.npz (pair_infos),"True set of distinct image relative paths referenced across all 1,500 pairs."
+Unique images referenced: Scene 0015,Scene 0015 (600 pairs),328,data/megadepth/megadepth_test_1500/0015_*.npz,Exactly 328 unique images in Scene 0015; perfectly disjoint from Scene 0022.
+Unique images referenced: Scene 0022,Scene 0022 (900 pairs),478,data/megadepth/megadepth_test_1500/0022_*.npz,Exactly 478 unique images in Scene 0022; perfectly disjoint from Scene 0015.
+"Apparent image count (1,439 in run log)","Pair-file qualified tuples (fname, idx)",1439,scripts/run_megadepth_benchmark.py:51-56,"Counted unique (fname, img_idx) tuples across overlap bucket files. Same image appearing in multiple overlap files was counted multiple times."
+"Feature pools on disk (11,284)",14 presets x 806 images,11284,data/pool_cache_megadepth/*/*.npz,"806 unique images * 14 presets = exactly 11,284 cached pool files."
+"Apparent pool count (11,298 mentioned in audit)",Hypothetical 807 images x 14,11298,Protocol / audit question text,"11,298 - 11,284 = 14 pools (exactly 1 image * 14 presets difference; off-by-one counting error in prior inventory)."

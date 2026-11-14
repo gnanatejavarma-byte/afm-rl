@@ -47,6 +47,20 @@ results/phase3/*
 
 results/phase3b/
 
+!results/phase4/
+results/phase4/*
+!results/phase4/*.md
+
+!results/phase4b/
+results/phase4b/*
+!results/phase4b/*.md
+
+!results/phase5/
+results/phase5/*
+!results/phase5/*.py
+!results/phase5/*.csv
+!results/phase5/*.md
+
 # Checkpoints ignore (best_model.zip files tracked explicitly in index)
 checkpoints_v2/
 

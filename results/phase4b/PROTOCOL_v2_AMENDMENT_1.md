@@ -72,3 +72,4 @@ In HPatches, the homography inlier proxy saturated differently than the epipolar
 
 4. **Match Archival & Reproducibility:**
    * All matched keypoint coordinate pairs $(p_0, p_1)$ in their original matcher order are compressed and archived to `results/phase4b/megadepth_matches/` as `.npz` records for complete post-run verification.
+

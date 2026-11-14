@@ -1,0 +1,6 @@
+fold,n_pairs,action3_stop_count,pct_action3,pct_stopped_immediately_step1,mean_steps_if_3_is_stop
+0,100,63,63.0,63.0,1.37
+1,100,60,60.0,60.0,1.4
+2,100,78,78.0,78.0,1.22
+3,100,69,69.0,69.0,1.31
+4,100,77,77.0,77.0,1.23

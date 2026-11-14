@@ -42,8 +42,6 @@ def evaluate_matches(pts1, pts2, H_gt, img_shape, ransac_seed=None):
 
     # 2) RANSAC (needs >= 4 matches) + corner error of the estimated homography
     if n >= 4:
-        if ransac_seed is not None:
-            cv2.setRNGSeed(int(ransac_seed) & 0x7FFFFFFF)
         H_est, mask = cv2.findHomography(pts1, pts2, cv2.RANSAC, REPROJ_PX)
         if H_est is not None and mask is not None:
             out["ransac_ratio"] = float(mask.sum()) / n
@@ -76,8 +74,6 @@ def compute_label_free_proxy(pts1, pts2, img_shape=None, ransac_seed=None):
     if n < 4:
         return out
 
-    if ransac_seed is not None:
-        cv2.setRNGSeed(int(ransac_seed) & 0x7FFFFFFF)
     H_est, mask = cv2.findHomography(pts1, pts2, cv2.RANSAC, REPROJ_PX)
     if H_est is None or mask is None:
         return out

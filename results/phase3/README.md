@@ -19,8 +19,8 @@ This directory contains the protocol, aggregated test evaluation results, dev he
 
 ## 2. Step-by-Step Table Reproduction
 
-### Step 1: Deterministic Evaluation Harness
-Ensure the OpenCV RANSAC deterministic seeding hook is enabled in `src/metrics.py`:
+### Step 1: Evaluation Harness & Determinism Note
+> **Note on RANSAC Determinism:** RANSAC outcome depends on correspondence order; 'seeds' in the noise-floor analysis are correspondence permutations. (The misleading `cv2.setRNGSeed` hook has been removed from `src/metrics.py` as OpenCV RANSAC uses an internal fixed RNG state).
 ```bash
 python results/phase3/check_headroom_agreement.py
 ```

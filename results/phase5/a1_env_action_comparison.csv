@@ -1,0 +1,25 @@
+env,action,semantic_intent,N_before,N_after,terminated,truncated
+Level2Env (HPatches Training/Eval),0,+500,100,600,False,False
+Level2Env (HPatches Training/Eval),1,+1000,100,1100,False,False
+Level2Env (HPatches Training/Eval),2,-500,100,100,False,False
+Level2Env (HPatches Training/Eval),3,STOP,100,100,True,False
+Level2Env (HPatches Training/Eval),0,+500,500,1000,False,False
+Level2Env (HPatches Training/Eval),1,+1000,500,1500,False,False
+Level2Env (HPatches Training/Eval),2,-500,500,100,False,False
+Level2Env (HPatches Training/Eval),3,STOP,500,500,True,False
+Level2Env (HPatches Training/Eval),0,+500,4000,4000,False,False
+Level2Env (HPatches Training/Eval),1,+1000,4000,4000,False,False
+Level2Env (HPatches Training/Eval),2,-500,4000,3500,False,False
+Level2Env (HPatches Training/Eval),3,STOP,4000,4000,True,False
+MegaDepthEvalEnv (MegaDepth Eval),0,STOP,100,100,True,False
+MegaDepthEvalEnv (MegaDepth Eval),1,+500,100,600,False,False
+MegaDepthEvalEnv (MegaDepth Eval),2,-500,100,100,False,False
+MegaDepthEvalEnv (MegaDepth Eval),3,+1000,100,1100,False,False
+MegaDepthEvalEnv (MegaDepth Eval),0,STOP,500,500,True,False
+MegaDepthEvalEnv (MegaDepth Eval),1,+500,500,1000,False,False
+MegaDepthEvalEnv (MegaDepth Eval),2,-500,500,100,False,False
+MegaDepthEvalEnv (MegaDepth Eval),3,+1000,500,1500,False,False
+MegaDepthEvalEnv (MegaDepth Eval),0,STOP,4000,4000,True,False
+MegaDepthEvalEnv (MegaDepth Eval),1,+500,4000,4000,False,False
+MegaDepthEvalEnv (MegaDepth Eval),2,-500,4000,3500,False,False
+MegaDepthEvalEnv (MegaDepth Eval),3,+1000,4000,4000,False,False

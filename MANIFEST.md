@@ -76,3 +76,58 @@ This manifest maps every publication table and figure candidate to the exact scr
 * **Description:** Visual localization recall evaluation on 225 pairs (150 Day + 75 Night).
 * **Execution Script:** `scripts/eval_aachen_hierarchical.py`
 * **Dataset Root:** `data/images_upright/`, `data/queries/`, `data/3D-models/`
+
+---
+
+## 4. Phase 5 MegaDepth Audit, Keypoint Accounting, Cascade Benchmark & Reproducibility
+
+### Section A: AFM-RL v1 Failure Mechanism & Observation Shift Audit
+* **Description:** Direct side-by-side verification of action semantics mismatch (STOP vs +1000) and 34-dim observation feature drift between HPatches training and MegaDepth evaluation.
+* **Execution Scripts:** `results/phase5/test_a1_actions.py`, `results/phase5/run_section_a_diagnostics.py`
+* **Source Modules:** `src/level2_env.py`, `src/megadepth_eval_env.py`
+* **Summary Output CSVs:**
+  * `results/phase5/a1_env_action_comparison.csv`
+  * `results/phase5/a2_observation_shift_summary.csv`
+  * `results/phase5/a3_rollout_diagnostics.csv`
+  * `results/phase5/a3_native_semantics_test_100pairs.csv`
+
+### Section B: Keypoint Accounting & Shortfall Audit
+* **Description:** Comprehensive accounting of keypoint shortfalls (especially SIFT-4000) across scenes, overlap buckets, and detector presets.
+* **Execution Script:** `results/phase5/b_keypoint_accounting.py`
+* **Raw Source Data:** `results/phase4b/megadepth_stage2a_priority_evaluations.csv`, `results/phase4b/megadepth_stage2b_remaining_baselines.csv`
+* **Summary Output CSV:** `results/phase5/b_keypoint_accounting_summary.csv`
+
+### Section C: Cross-Scene Cascade Fitting & Primary Comparisons
+* **Description:** Cross-scene parameter tuning (Train 0015 -> Test 0022 and vice-versa) and evaluation of pre-registered Cascade C* ($C_6$ `[ALIKED-500 -> SIFT-4000]`, $\tau=0.40$) vs fixed baselines.
+* **Execution Script:** `results/phase5/c_cascade_cross_scene.py`
+* **Raw Source Data:** `results/phase4b/megadepth_stage2a_priority_evaluations.csv`, `results/phase4b/megadepth_stage2b_remaining_baselines.csv`
+* **Summary Output CSVs:**
+  * `results/phase5/c_cross_scene_fitting_summary.csv`
+  * `results/phase5/c_hpatches_preregistered_c_star.csv`
+  * `results/phase5/c_primary_comparisons_summary.csv`
+
+### Section D: Cascade Ablations & Sanity Controls
+* **Description:** Ablation baselines including Always Both, Oracle-of-Two, Proxy-Pick ALIKED, Random Escalation Control, and Nearest Fixed baselines.
+* **Execution Script:** `results/phase5/d_ablations.py`
+* **Raw Source Data:** `results/phase4b/megadepth_stage2a_priority_evaluations.csv`, `results/phase4b/megadepth_stage2b_remaining_baselines.csv`
+* **Summary Output CSV:** `results/phase5/d_ablations_summary.csv`
+
+### Section E: Statistical Rigor & Correspondence Permutation Robustness
+* **Description:** Pair-level and reference-image cluster bootstrap confidence intervals (1,000 resamples across 629 anchor image clusters) and 3-seed match permutation test.
+* **Execution Scripts:** `results/phase5/e_statistical_evaluations.py`, `results/phase5/e_permutation_test.py`
+* **Raw Source Data:** `results/phase4b/megadepth_stage2a_priority_evaluations.csv`, `results/phase4b/megadepth_stage2b_remaining_baselines.csv`, `results/phase4b/megadepth_matches/`
+* **Summary Output CSVs:**
+  * `results/phase5/e_statistical_comparisons.csv`
+  * `results/phase5/e_permutation_robustness_summary.csv`
+
+### Section F: CPU Wall-Clock Latency Benchmark
+* **Description:** Cold-start latency breakdown across pair statistics, RL policy inference (L1 and L2), and feature extraction/matching on Intel CPU.
+* **Execution Script:** `results/phase5/f_wallclock_benchmark.py`
+* **Summary Output CSV:** `results/phase5/f_wallclock_summary.csv`
+
+### Section G: Dataset Image & Pool File Reconciliation
+* **Description:** Exact verification and reconciliation of physical images on disk, pair indices, and keypoint pool files across scenes.
+* **Execution Script:** `results/phase5/g_housekeeping.py`
+* **Summary Output CSV:** `results/phase5/g_image_reconciliation.csv`
+
+
