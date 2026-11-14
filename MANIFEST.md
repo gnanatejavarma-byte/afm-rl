@@ -130,4 +130,67 @@ This manifest maps every publication table and figure candidate to the exact scr
 * **Execution Script:** `results/phase5/g_housekeeping.py`
 * **Summary Output CSV:** `results/phase5/g_image_reconciliation.csv`
 
+---
+
+## 5. Phase 5b MegaDepth Env Parity Fix, 1,500-Pair Cascade Permutation, Control Hierarchy, and GPU Benchmark
+
+### Notice of Invalidation: Phase 5a Stage 3 Run
+* **Description:** Archived invalid Phase 5a Stage 3 AFM-RL evaluation caused by action semantic duplication (Action 3 was mapped to +1000 instead of STOP).
+* **Archive Location:** `results/phase5b/INVALID_stage3_action_bug/`
+* **Documentation:** `results/phase5b/INVALID_stage3_action_bug/README.md`
+* **Legacy File:** `results/phase5b/old_megadepth_eval_env.py`
+
+### Section A: MegaDepth Env Parity & AFM-RL v1 Rerun
+* **Description:** Refactored `src/megadepth_eval_env.py` to import unified action tables, observation layout, and stepping logic directly from `src/level2_env.py`. Verified bit-identical observations and transitions via unit test. Reran AFM-RL v1 on all 1,500 pairs x 5 folds (7,500 evaluations).
+* **Parity Test Script:** `results/phase5b/test_parity.py` (Output: `results/phase5b/parity_test_sample_vector.csv`)
+* **Rerun Evaluation Script:** `results/phase5b/run_stage3_fixed.py`
+* **Analysis Script:** `results/phase5b/finish_a4_summaries.py`
+* **Raw Evaluation CSV:** `results/phase5b/megadepth_stage3_afm_rl_v1_fixed.csv` (7,500 rows)
+* **Summary Output CSVs:**
+  * `results/phase5b/a4_stage3_fixed_summary.csv`
+  * `results/phase5b/a4_step0_proxy_quantiles.csv`
+  * `results/phase5b/a4_l2_action_probs_by_proxy_bucket.csv`
+  * `results/phase5b/a4_bootstrap_comparisons.csv`
+
+### Section B: Full 1,500-Pair Permutation Robustness & Match Order Structure
+* **Description:** Evaluated 5 random correspondence permutations across all 1,500 MegaDepth pairs (4,500 evaluations) using 5 parallel worker processes. Quantified performance stability and match ordering structure.
+* **Execution Script:** `results/phase5b/b2_cascade_permutations_fast.py`
+* **Raw Shards:** `results/phase5b/b2_perm_shard_{0..4}.csv`
+* **Raw Concatenated CSV:** `results/phase5b/b2_permutations_eval_records.csv` (4,500 rows)
+* **Summary Output CSVs:**
+  * `results/phase5b/b1_match_inventory_summary.csv`
+  * `results/phase5b/b2_permutation_robustness_all_pairs.csv`
+  * `results/phase5b/b2_bootstrap_permutation_comparisons.csv`
+  * `results/phase5b/b3_match_order_structure.csv`
+
+### Section C: Cascade Provenance & Sensitivity
+* **Description:** Formal audit of Protocol v2 Amendment 1 and HPatches 5-fold CV cascade selection. Identified post-hoc nature of C6 pre-registration in Phase 5a. Computed exact 5-fold CV cascade performance and full 24-configuration sensitivity grid.
+* **Analysis Script:** `results/phase5b/c_provenance_and_sensitivity.py`
+* **Summary Output CSVs:**
+  * `results/phase5b/c2_fold_selected_cascades_summary.csv`
+  * `results/phase5b/c3_sensitivity_table_all_cascades.csv`
+
+### Section D: Comprehensive Ablation Controls
+* **Description:** Evaluated 20 independent draws of Control (iv) Random Escalation, Control (vi) Anti-Cascade, and individual component threshold controls (Inlier count alone, Inlier ratio alone, Sampson error alone).
+* **Analysis Script:** `results/phase5b/d_controls.py`
+* **Summary Output CSVs:**
+  * `results/phase5b/d1_control_iv_20draws.csv`
+  * `results/phase5b/d_controls_summary.csv`
+
+### Section E: Complete Benchmark Tables
+* **Description:** Automated script generating unified, reproducible publication tables combining fixed baselines, AFM-RL v1, cascade methods, ablations, and CPU/GPU latencies.
+* **Generation Script:** `results/phase5b/generate_tables.py`
+* **Summary Output CSVs:**
+  * `results/phase5b/table_megadepth_complete.csv`
+  * `results/phase5b/table_hpatches_complete.csv`
+
+### Section F: GPU Benchmarks (NVIDIA RTX 3050 Laptop GPU, 4 GB VRAM)
+* **Description:** Hardware timing and feature pool numerical compatibility benchmarks executed inside isolated `.venv-gpu` environment.
+* **Execution Script:** `results/phase5b/f_gpu_benchmark.py`
+* **Summary Output CSVs:**
+  * `results/phase5b/f3_gpu_latency_summary.csv`
+  * `results/phase5b/f4_gpu_pool_compatibility.csv`
+  * `results/phase5b/f4_pool_compatibility_summary.csv`
+
+
 

@@ -14,9 +14,16 @@ from image_stats import compute_pair_stats, normalize_stats, N_STATS
 POOL_CACHE_DIR = Path("data/pool_cache_megadepth")
 STATS_CACHE_DIR = Path("data/megadepth/stats_cache")
 
-OBS_DIM = 34
-MAX_STEPS = 5
-MATCH_NORM = 200.0
+from level2_env import (
+    STEP_SIZES,
+    MAX_STEPS,
+    OBS_DIM,
+    MATCH_NORM,
+    N_PRESETS,
+    DEFAULT_LAMBDA,
+    STEP_PENALTY,
+    build_level2_obs,
+)
 
 
 def compute_epipolar_proxy(pts1, pts2, K0, K1, thr=0.5):
@@ -218,22 +225,28 @@ class MegaDepthEvalEnv(gym.Env):
         self.cum_kp = 0
 
         self.pair_stats = self._stats(fname, i, j, self.img1, self.img2)
-        self.prev_proxy = 0.0
-        self.prev_inlier_ratio = 0.0
-        self.prev_n_matches = 0.0
 
         # Enable rollout guard
         self._in_eval_rollout = True
         self._run_and_eval()
         self.cum_kp += self.effective_kp
 
+        # Initial step dynamics matching Level2Env
+        self.prev_utility = self.utility
+        self.prev_acc = self.last_acc
+        self.delta_acc = 0.0
+        self.delta_utility = 0.0
+        self.is_plateau = float(self.effective_kp >= self.pool_size)
+
         # Scoreboard tracking (proxy utility)
-        self.best_proxy_utility = self.proxy_utility
+        self.best_utility = self.utility
+        self.best_proxy_utility = self.utility
         self.best_proxy = self.last_proxy
-        self.best_n_kp = self.n_kp
+        self.best_n_kp = self.effective_kp
         self.best_n_matches = self.last_r["n_matches"]
         self.best_pts1 = self.last_r["pts1"]
         self.best_pts2 = self.last_r["pts2"]
+        self.gap_from_best = 0.0
 
         return self._get_obs(), self._get_info()
 
@@ -250,44 +263,33 @@ class MegaDepthEvalEnv(gym.Env):
         proxy_res = compute_epipolar_proxy(r["pts1"], r["pts2"], self.K0, self.K1)
         self.last_proxy_res = proxy_res
         self.last_proxy = proxy_res["proxy"]
+        self.last_acc = self.last_proxy
         self.last_inlier_ratio = proxy_res["inlier_ratio"]
         self.last_n_matches = min(r["n_matches"], MATCH_NORM) / MATCH_NORM
 
         # Proxy utility: proxy - lambda * (n_kp / N_MAX)
         self.proxy_utility = self.last_proxy - self.lam * (self.effective_kp / pu.N_MAX)
+        self.utility = self.proxy_utility
         return proxy_res
 
     def _get_obs(self):
-        one_hot = np.zeros(len(pu.PRESET_NAMES), dtype=np.float32)
-        one_hot[self.preset_idx] = 1.0
-
-        budget_norm = float(self.n_kp / pu.N_MAX)
-        effective_norm = float(self.effective_kp / pu.N_MAX)
-        pool_norm = float(self.pool_size / pu.N_MAX)
-        step_norm = float(self.steps / MAX_STEPS)
-
-        delta_proxy = self.last_proxy - self.prev_proxy
-        delta_ratio = self.last_inlier_ratio - self.prev_inlier_ratio
-        delta_matches = self.last_n_matches - self.prev_n_matches
-
-        obs = np.concatenate([
+        return build_level2_obs(
             self.pair_stats,
-            one_hot,
-            np.array([
-                budget_norm,
-                effective_norm,
-                pool_norm,
-                step_norm,
-                self.last_proxy,
-                delta_proxy,
-                self.last_inlier_ratio,
-                delta_ratio,
-                self.last_n_matches,
-                delta_matches,
-                0.0,  # placeholder
-            ], dtype=np.float32),
-        ])
-        return obs[:OBS_DIM].astype(np.float32)
+            self.preset_idx,
+            N_PRESETS,
+            self.n_kp,
+            self.effective_kp,
+            self.pool_size,
+            self.last_acc,
+            self.last_inlier_ratio,
+            self.last_n_matches,
+            self.steps,
+            self.delta_acc,
+            self.delta_utility,
+            self.is_plateau,
+            self.gap_from_best,
+            MAX_STEPS,
+        )
 
     def _get_info(self):
         return {
@@ -302,46 +304,48 @@ class MegaDepthEvalEnv(gym.Env):
 
     def step(self, action):
         """
-        Actions:
-            0: STOP
-            1: n_kp + 500
+        Actions (identical to Level2Env):
+            0: n_kp + 500
+            1: n_kp + 1000
             2: n_kp - 500
-            3: n_kp + 1000
+            3: STOP
         """
         if not self._in_eval_rollout:
             raise RuntimeError("step called outside active episode rollout!")
 
         self.steps += 1
-        self.prev_proxy = self.last_proxy
-        self.prev_inlier_ratio = self.last_inlier_ratio
-        self.prev_n_matches = self.last_n_matches
+        delta = STEP_SIZES[action]
 
-        if action == 0:
+        if delta is None:  # Action 3: STOP
+            self._in_eval_rollout = False
             terminated = True
-        elif action == 1:
-            self.n_kp = min(pu.N_MAX, self.n_kp + 500)
-            terminated = False
-        elif action == 2:
-            self.n_kp = max(pu.N_MIN, self.n_kp - 500)
-            terminated = False
-        elif action == 3:
-            self.n_kp = min(pu.N_MAX, self.n_kp + 1000)
-            terminated = False
-        else:
-            raise ValueError(f"Invalid action {action}")
+            truncated = False
+            return self._get_obs(), 0.0, terminated, truncated, self._get_info()
+
+        self.n_kp = int(np.clip(self.n_kp + delta, pu.N_MIN, pu.N_MAX))
+        self._run_and_eval()
+        self.cum_kp += self.effective_kp
 
         truncated = (self.steps >= MAX_STEPS)
+        terminated = False
 
-        if not terminated:
-            self._run_and_eval()
-            self.cum_kp += self.effective_kp
-            if self.proxy_utility > self.best_proxy_utility:
-                self.best_proxy_utility = self.proxy_utility
-                self.best_proxy = self.last_proxy
-                self.best_n_kp = self.n_kp
-                self.best_n_matches = self.last_r["n_matches"]
-                self.best_pts1 = self.last_r["pts1"]
-                self.best_pts2 = self.last_r["pts2"]
+        self.delta_acc = self.last_acc - self.prev_acc
+        self.delta_utility = self.utility - self.prev_utility
+        self.is_plateau = float(self.effective_kp >= self.pool_size)
+
+        self.prev_utility = self.utility
+        self.prev_acc = self.last_acc
+
+        if self.utility > self.best_utility:
+            self.best_utility = self.utility
+            self.best_proxy_utility = self.utility
+            self.best_n_kp = self.effective_kp
+            self.best_proxy = self.last_proxy
+            self.best_n_matches = self.last_r["n_matches"]
+            self.best_pts1 = self.last_r["pts1"]
+            self.best_pts2 = self.last_r["pts2"]
+
+        self.gap_from_best = self.utility - self.best_utility
 
         reward = 0.0  # Eval mode does not compute training reward
 

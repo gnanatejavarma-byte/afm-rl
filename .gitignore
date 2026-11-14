@@ -1,5 +1,6 @@
 # Virtual Environments
 .venv/
+.venv-gpu/
 venv/
 env/
 
@@ -60,6 +61,14 @@ results/phase5/*
 !results/phase5/*.py
 !results/phase5/*.csv
 !results/phase5/*.md
+
+!results/phase5b/
+results/phase5b/*
+!results/phase5b/*.py
+!results/phase5b/*.csv
+!results/phase5b/*.md
+!results/phase5b/INVALID_stage3_action_bug/
+!results/phase5b/INVALID_stage3_action_bug/*
 
 # Checkpoints ignore (best_model.zip files tracked explicitly in index)
 checkpoints_v2/

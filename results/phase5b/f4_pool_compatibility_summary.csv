@@ -1,0 +1,2 @@
+n_pairs_evaluated,pct_identical_kp_count,mean_max_coord_diff_px,max_max_coord_diff_px,mean_abs_diff_p_epi,max_abs_diff_p_epi,mean_abs_diff_pose_err,pct_identical_cascade_decisions
+20,100.0,913.0363098144531,1182.28662109375,0.008044770396763297,0.034940432998080695,1.2227384510833201,100.0

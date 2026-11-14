@@ -23,6 +23,28 @@ OBS_DIM = N_STATS + N_PRESETS + 11
 #       delta_acc, delta_utility, is_plateau, gap_from_best
 
 
+def build_level2_obs(pair_stats, preset_idx, n_presets, n_kp, effective_kp,
+                     pool_size, last_acc, last_inlier_ratio, last_n_matches,
+                     steps, delta_acc, delta_utility, is_plateau, gap_from_best,
+                     max_steps=MAX_STEPS):
+    onehot = np.zeros(n_presets, dtype=np.float32)
+    onehot[preset_idx] = 1.0
+    extra = np.array([
+        n_kp / pu.N_MAX,
+        effective_kp / pu.N_MAX,
+        pool_size / pu.N_MAX,
+        last_acc,
+        last_inlier_ratio,
+        last_n_matches,
+        steps / max_steps,
+        delta_acc,
+        delta_utility,
+        is_plateau,
+        gap_from_best,
+    ], dtype=np.float32)
+    return np.concatenate([pair_stats, onehot, extra]).astype(np.float32)
+
+
 class Level2Env(gym.Env):
     metadata = {"render_modes": []}
 
@@ -122,22 +144,23 @@ class Level2Env(gym.Env):
             self.best_r = self.last_r
 
     def _obs(self):
-        onehot = np.zeros(N_PRESETS, dtype=np.float32)
-        onehot[self.preset_idx] = 1.0
-        extra = np.array([
-            self.n_kp / pu.N_MAX,
-            self.effective_kp / pu.N_MAX,
-            self.pool_size / pu.N_MAX,
+        return build_level2_obs(
+            self._pair_stats,
+            self.preset_idx,
+            N_PRESETS,
+            self.n_kp,
+            self.effective_kp,
+            self.pool_size,
             self.last_acc,
             self.last_inlier_ratio,
             self.last_n_matches,
-            self.steps / MAX_STEPS,
-            self.delta_acc,       # did accuracy improve on the LAST step?
-            self.delta_utility,   # did overall utility improve on the LAST step?
-            self.is_plateau,      # 1.0 if the detector's pool is already maxed out
-            self.gap_from_best,   # how far BELOW this episode's own best are we right now? (<=0)
-        ], dtype=np.float32)
-        return np.concatenate([self._pair_stats, onehot, extra]).astype(np.float32)
+            self.steps,
+            self.delta_acc,
+            self.delta_utility,
+            self.is_plateau,
+            self.gap_from_best,
+            MAX_STEPS,
+        )
 
     def _init_episode_state(self):
         """Shared setup after the first _run_and_eval() of an episode."""
