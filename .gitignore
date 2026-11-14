@@ -70,6 +70,14 @@ results/phase5b/*
 !results/phase5b/INVALID_stage3_action_bug/
 !results/phase5b/INVALID_stage3_action_bug/*
 
+!results/final/
+results/final/*
+!results/final/*.py
+!results/final/*.csv
+!results/final/*.md
+!results/final/tables/
+!results/final/tables/*
+
 # Checkpoints ignore (best_model.zip files tracked explicitly in index)
 checkpoints_v2/
 

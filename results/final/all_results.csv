@@ -1,0 +1,317 @@
+table,row,column,value,source_file,source_row
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),eval_type,"Pooled (5 Folds, 580 pairs)",results/phase4b/b2_permutation_summary_table.csv,row 2
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),succ_3px_pct,72.41,results/phase4b/b2_permutation_summary_table.csv,row 2
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),auc_1px,20.12,results/phase3/folds_summary_table.csv,row 7
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),auc_3px,46.81,results/phase4b/b2_permutation_summary_table.csv,row 2
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),auc_5px,55.83,results/phase3/folds_summary_table.csv,row 7
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),final_kp,500.0,results/phase3/folds_summary_table.csv,row 7
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),cum_kp,1215.38,results/phase4b/b2_permutation_summary_table.csv,row 2
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),mean_steps,1.00,results/phase3/folds_summary_table.csv,row 7
+T1_HPatches_Main,Best Fixed (Fold VAL),eval_type,"Pooled (5 Folds, 580 pairs)",results/phase4b/b2_permutation_summary_table.csv,row 3
+T1_HPatches_Main,Best Fixed (Fold VAL),succ_3px_pct,73.97,results/phase4b/b2_permutation_summary_table.csv,row 3
+T1_HPatches_Main,Best Fixed (Fold VAL),auc_1px,21.64,results/phase3/folds_summary_table.csv,row 13
+T1_HPatches_Main,Best Fixed (Fold VAL),auc_3px,49.64,results/phase4b/b2_permutation_summary_table.csv,row 3
+T1_HPatches_Main,Best Fixed (Fold VAL),auc_5px,58.62,results/phase3/folds_summary_table.csv,row 13
+T1_HPatches_Main,Best Fixed (Fold VAL),final_kp,4000.0,results/phase3/folds_summary_table.csv,row 13
+T1_HPatches_Main,Best Fixed (Fold VAL),cum_kp,4000.0,results/phase4b/b2_permutation_summary_table.csv,row 3
+T1_HPatches_Main,Best Fixed (Fold VAL),mean_steps,1.00,results/phase3/folds_summary_table.csv,row 13
+T1_HPatches_Main,ALIKED-500,eval_type,"Pooled (5 Folds, 580 pairs)",results/phase4b/b2_permutation_summary_table.csv,row 4
+T1_HPatches_Main,ALIKED-500,succ_3px_pct,72.59,results/phase4b/b2_permutation_summary_table.csv,row 4
+T1_HPatches_Main,ALIKED-500,auc_1px,20.25,results/phase3/folds_summary_table.csv,row 20
+T1_HPatches_Main,ALIKED-500,auc_3px,46.88,results/phase4b/b2_permutation_summary_table.csv,row 4
+T1_HPatches_Main,ALIKED-500,auc_5px,55.89,results/phase3/folds_summary_table.csv,row 20
+T1_HPatches_Main,ALIKED-500,final_kp,500.0,results/phase4b/b2_permutation_summary_table.csv,row 4
+T1_HPatches_Main,ALIKED-500,cum_kp,500.0,results/phase4b/b2_permutation_summary_table.csv,row 4
+T1_HPatches_Main,ALIKED-500,mean_steps,1.00,results/phase3/folds_summary_table.csv,row 20
+T1_HPatches_Main,ALIKED-1000,eval_type,"Pooled (5 Folds, 580 pairs)",results/phase4b/b2_permutation_summary_table.csv,row 5
+T1_HPatches_Main,ALIKED-1000,succ_3px_pct,73.62,results/phase4b/b2_permutation_summary_table.csv,row 5
+T1_HPatches_Main,ALIKED-1000,auc_1px,20.73,results/phase3/pareto_plot_data.csv,ALIKED-1000
+T1_HPatches_Main,ALIKED-1000,auc_3px,47.56,results/phase4b/b2_permutation_summary_table.csv,row 5
+T1_HPatches_Main,ALIKED-1000,auc_5px,56.54,results/phase3/pareto_plot_data.csv,ALIKED-1000
+T1_HPatches_Main,ALIKED-1000,final_kp,1000.0,results/phase4b/b2_permutation_summary_table.csv,row 5
+T1_HPatches_Main,ALIKED-1000,cum_kp,1000.0,results/phase4b/b2_permutation_summary_table.csv,row 5
+T1_HPatches_Main,ALIKED-1000,mean_steps,1.00,results/phase3/pareto_plot_data.csv,ALIKED-1000
+T1_HPatches_Main,SIFT-500,eval_type,"Pooled (5 Folds, 580 pairs)",results/phase3/pareto_plot_data.csv,SIFT-500
+T1_HPatches_Main,SIFT-500,succ_3px_pct,67.59,results/phase3/pareto_plot_data.csv,SIFT-500
+T1_HPatches_Main,SIFT-500,auc_1px,18.32,results/phase3/pareto_plot_data.csv,SIFT-500
+T1_HPatches_Main,SIFT-500,auc_3px,44.68,results/phase3/pareto_plot_data.csv,SIFT-500
+T1_HPatches_Main,SIFT-500,auc_5px,53.41,results/phase3/pareto_plot_data.csv,SIFT-500
+T1_HPatches_Main,SIFT-500,final_kp,500.0,results/phase3/pareto_plot_data.csv,SIFT-500
+T1_HPatches_Main,SIFT-500,cum_kp,500.0,results/phase3/pareto_plot_data.csv,SIFT-500
+T1_HPatches_Main,SIFT-500,mean_steps,1.00,results/phase3/pareto_plot_data.csv,SIFT-500
+T1_HPatches_Main,SIFT-1000,eval_type,"Pooled (5 Folds, 580 pairs)",results/phase3/pareto_plot_data.csv,SIFT-1000
+T1_HPatches_Main,SIFT-1000,succ_3px_pct,71.21,results/phase3/pareto_plot_data.csv,SIFT-1000
+T1_HPatches_Main,SIFT-1000,auc_1px,19.88,results/phase3/pareto_plot_data.csv,SIFT-1000
+T1_HPatches_Main,SIFT-1000,auc_3px,47.50,results/phase3/pareto_plot_data.csv,SIFT-1000
+T1_HPatches_Main,SIFT-1000,auc_5px,56.45,results/phase3/pareto_plot_data.csv,SIFT-1000
+T1_HPatches_Main,SIFT-1000,final_kp,1000.0,results/phase3/pareto_plot_data.csv,SIFT-1000
+T1_HPatches_Main,SIFT-1000,cum_kp,1000.0,results/phase3/pareto_plot_data.csv,SIFT-1000
+T1_HPatches_Main,SIFT-1000,mean_steps,1.00,results/phase3/pareto_plot_data.csv,SIFT-1000
+T1_HPatches_Main,SIFT-2000,eval_type,"Pooled (5 Folds, 580 pairs)",results/phase4b/b2_permutation_summary_table.csv,row 6
+T1_HPatches_Main,SIFT-2000,succ_3px_pct,72.76,results/phase4b/b2_permutation_summary_table.csv,row 6
+T1_HPatches_Main,SIFT-2000,auc_1px,20.91,results/phase3/folds_summary_table.csv,row 27
+T1_HPatches_Main,SIFT-2000,auc_3px,49.01,results/phase4b/b2_permutation_summary_table.csv,row 6
+T1_HPatches_Main,SIFT-2000,auc_5px,57.98,results/phase3/folds_summary_table.csv,row 27
+T1_HPatches_Main,SIFT-2000,final_kp,2000.0,results/phase4b/b2_permutation_summary_table.csv,row 6
+T1_HPatches_Main,SIFT-2000,cum_kp,2000.0,results/phase4b/b2_permutation_summary_table.csv,row 6
+T1_HPatches_Main,SIFT-2000,mean_steps,1.00,results/phase3/folds_summary_table.csv,row 27
+T1_HPatches_Main,SIFT-4000,eval_type,"Pooled (5 Folds, 580 pairs)",results/phase4b/b2_permutation_summary_table.csv,row 7
+T1_HPatches_Main,SIFT-4000,succ_3px_pct,72.93,results/phase4b/b2_permutation_summary_table.csv,row 7
+T1_HPatches_Main,SIFT-4000,auc_1px,22.39,results/phase3/folds_summary_table.csv,row 34
+T1_HPatches_Main,SIFT-4000,auc_3px,51.13,results/phase4b/b2_permutation_summary_table.csv,row 7
+T1_HPatches_Main,SIFT-4000,auc_5px,59.98,results/phase3/folds_summary_table.csv,row 34
+T1_HPatches_Main,SIFT-4000,final_kp,4000.0,results/phase4b/b2_permutation_summary_table.csv,row 7
+T1_HPatches_Main,SIFT-4000,cum_kp,4000.0,results/phase4b/b2_permutation_summary_table.csv,row 7
+T1_HPatches_Main,SIFT-4000,mean_steps,1.00,results/phase3/folds_summary_table.csv,row 34
+T1_HPatches_Main,XFeat-1000,eval_type,"Pooled (5 Folds, 580 pairs)",results/phase3/pareto_plot_data.csv,XFeat-1000
+T1_HPatches_Main,XFeat-1000,succ_3px_pct,71.90,results/phase3/pareto_plot_data.csv,XFeat-1000
+T1_HPatches_Main,XFeat-1000,auc_1px,20.15,results/phase3/pareto_plot_data.csv,XFeat-1000
+T1_HPatches_Main,XFeat-1000,auc_3px,47.21,results/phase3/pareto_plot_data.csv,XFeat-1000
+T1_HPatches_Main,XFeat-1000,auc_5px,56.02,results/phase3/pareto_plot_data.csv,XFeat-1000
+T1_HPatches_Main,XFeat-1000,final_kp,1000.0,results/phase3/pareto_plot_data.csv,XFeat-1000
+T1_HPatches_Main,XFeat-1000,cum_kp,1000.0,results/phase3/pareto_plot_data.csv,XFeat-1000
+T1_HPatches_Main,XFeat-1000,mean_steps,1.00,results/phase3/pareto_plot_data.csv,XFeat-1000
+T1_HPatches_Main,Oracle Preset (Upper Bound)*,eval_type,"Pooled (5 Folds, 580 pairs)",results/phase3/folds_summary_table.csv,row 41
+T1_HPatches_Main,Oracle Preset (Upper Bound)*,succ_3px_pct,80.69,results/phase3/folds_summary_table.csv,row 41
+T1_HPatches_Main,Oracle Preset (Upper Bound)*,auc_1px,24.97,results/phase3/folds_summary_table.csv,row 41
+T1_HPatches_Main,Oracle Preset (Upper Bound)*,auc_3px,56.33,results/phase3/folds_summary_table.csv,row 41
+T1_HPatches_Main,Oracle Preset (Upper Bound)*,auc_5px,65.31,results/phase3/folds_summary_table.csv,row 41
+T1_HPatches_Main,Oracle Preset (Upper Bound)*,final_kp,4000.0,results/phase3/folds_summary_table.csv,row 41
+T1_HPatches_Main,Oracle Preset (Upper Bound)*,cum_kp,4000.0,results/phase3/folds_summary_table.csv,row 41
+T1_HPatches_Main,Oracle Preset (Upper Bound)*,mean_steps,1.00,results/phase3/folds_summary_table.csv,row 41
+T1_HPatches_Main,AFM-RL v2 Cascade (Exploratory),eval_type,"Pooled (5 Folds, 580 pairs)",results/phase4b/b3_bootstrap_comparisons.csv,row 6
+T1_HPatches_Main,AFM-RL v2 Cascade (Exploratory),succ_3px_pct,76.21,results/phase4b/b3_bootstrap_comparisons.csv,row 6
+T1_HPatches_Main,AFM-RL v2 Cascade (Exploratory),auc_1px,21.68,results/phase4/hpatches_v2_cascade_eval.csv,mean
+T1_HPatches_Main,AFM-RL v2 Cascade (Exploratory),auc_3px,49.61,results/phase4b/b3_bootstrap_comparisons.csv,row 6
+T1_HPatches_Main,AFM-RL v2 Cascade (Exploratory),auc_5px,58.74,results/phase4/hpatches_v2_cascade_eval.csv,mean
+T1_HPatches_Main,AFM-RL v2 Cascade (Exploratory),final_kp,1165.5,results/phase4/hpatches_v2_cascade_eval.csv,mean
+T1_HPatches_Main,AFM-RL v2 Cascade (Exploratory),cum_kp,1548.3,results/phase4/hpatches_v2_cascade_eval.csv,mean
+T1_HPatches_Main,AFM-RL v2 Cascade (Exploratory),mean_steps,1.41,results/phase4/hpatches_v2_cascade_eval.csv,mean
+T1_HPatches_Main,P1: AFM-RL v1 vs Best Fixed,delta_succ_3px,"-1.55% [-5.34%, +1.90%]",results/phase4b/b3_bootstrap_comparisons.csv,row 2
+T1_HPatches_Main,P1: AFM-RL v1 vs Best Fixed,delta_auc_3px,"-2.83 [-5.67%, -0.29%]",results/phase4b/b3_bootstrap_comparisons.csv,row 2
+T1_HPatches_Main,P2: AFM-RL v1 vs ALIKED-500,delta_succ_3px,"-0.17% [-1.03%, +0.52%]",results/phase4b/b3_bootstrap_comparisons.csv,row 3
+T1_HPatches_Main,P2: AFM-RL v1 vs ALIKED-500,delta_auc_3px,"-0.08 [-0.56%, +0.38%]",results/phase4b/b3_bootstrap_comparisons.csv,row 3
+T1_HPatches_Main,P3: AFM-RL v1 vs SIFT-2000,delta_succ_3px,"-0.34% [-4.48%, +3.45%]",results/phase4b/b3_bootstrap_comparisons.csv,row 4
+T1_HPatches_Main,P3: AFM-RL v1 vs SIFT-2000,delta_auc_3px,"-2.20 [-5.25%, +0.74%]",results/phase4b/b3_bootstrap_comparisons.csv,row 4
+T1_HPatches_Main,P4: AFM-RL v1 vs SIFT-4000,delta_succ_3px,"-0.52% [-4.66%, +3.28%]",results/phase4b/b3_bootstrap_comparisons.csv,row 5
+T1_HPatches_Main,P4: AFM-RL v1 vs SIFT-4000,delta_auc_3px,"-4.32 [-7.31%, -1.54%]",results/phase4b/b3_bootstrap_comparisons.csv,row 5
+T1_HPatches_Main,P5: AFM-RL v1 vs Oracle Preset*,delta_succ_3px,"-8.28% [-11.72%, -4.83%]",results/phase3/primary_comparisons_P1_P5.csv,row 5
+T1_HPatches_Main,P5: AFM-RL v1 vs Oracle Preset*,delta_auc_3px,"-9.52 [-12.21, -6.84]",results/phase3/primary_comparisons_P1_P5.csv,row 5
+T2_MegaDepth_Main,SIFT-500,succ_10_deg,35.80,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-500 subset
+T2_MegaDepth_Main,SIFT-500,auc_5_deg,14.19,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-500 subset
+T2_MegaDepth_Main,SIFT-500,auc_10_deg,23.32,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-500 subset
+T2_MegaDepth_Main,SIFT-500,auc_20_deg,33.37,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-500 subset
+T2_MegaDepth_Main,SIFT-500,requested_n,500,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-500 subset
+T2_MegaDepth_Main,SIFT-500,cum_actual_kp,496.26,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-500 subset
+T2_MegaDepth_Main,SIFT-500,device,CPU,Protocol v2,CPU
+T2_MegaDepth_Main,SIFT-500,latency_median_ms,948.3,results/phase4b/c2_expected_wallclock_summary.csv,historical
+T2_MegaDepth_Main,SIFT-1000,succ_10_deg,55.40,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-1000 subset
+T2_MegaDepth_Main,SIFT-1000,auc_5_deg,26.85,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-1000 subset
+T2_MegaDepth_Main,SIFT-1000,auc_10_deg,38.83,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-1000 subset
+T2_MegaDepth_Main,SIFT-1000,auc_20_deg,49.92,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-1000 subset
+T2_MegaDepth_Main,SIFT-1000,requested_n,1000,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-1000 subset
+T2_MegaDepth_Main,SIFT-1000,cum_actual_kp,993.43,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-1000 subset
+T2_MegaDepth_Main,SIFT-1000,device,CPU,Protocol v2,CPU
+T2_MegaDepth_Main,SIFT-1000,latency_median_ms,1182.4,results/phase4b/c2_expected_wallclock_summary.csv,historical
+T2_MegaDepth_Main,SIFT-2000,succ_10_deg,66.80,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-2000 subset
+T2_MegaDepth_Main,SIFT-2000,auc_5_deg,33.91,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-2000 subset
+T2_MegaDepth_Main,SIFT-2000,auc_10_deg,46.14,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-2000 subset
+T2_MegaDepth_Main,SIFT-2000,auc_20_deg,57.51,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-2000 subset
+T2_MegaDepth_Main,SIFT-2000,requested_n,2000,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-2000 subset
+T2_MegaDepth_Main,SIFT-2000,cum_actual_kp,1989.67,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-2000 subset
+T2_MegaDepth_Main,SIFT-2000,device,CPU,Protocol v2,CPU
+T2_MegaDepth_Main,SIFT-2000,latency_median_ms,1286.31,results/final/timing_benchmark.csv,row 2
+T2_MegaDepth_Main,SIFT-2000,latency_mean_ms,1366.51,results/final/timing_benchmark.csv,row 2
+T2_MegaDepth_Main,SIFT-4000,succ_10_deg,77.20,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-4000 subset
+T2_MegaDepth_Main,SIFT-4000,auc_5_deg,39.73,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-4000 subset
+T2_MegaDepth_Main,SIFT-4000,auc_10_deg,54.78,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-4000 subset
+T2_MegaDepth_Main,SIFT-4000,auc_20_deg,67.43,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-4000 subset
+T2_MegaDepth_Main,SIFT-4000,requested_n,4000,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-4000 subset
+T2_MegaDepth_Main,SIFT-4000,cum_actual_kp,3821.14,results/phase4b/megadepth_stage2a_priority_evaluations.csv,SIFT-4000 subset
+T2_MegaDepth_Main,SIFT-4000,device,CPU,Protocol v2,CPU
+T2_MegaDepth_Main,SIFT-4000,latency_median_ms,1456.14,results/final/timing_benchmark.csv,row 3
+T2_MegaDepth_Main,SIFT-4000,latency_mean_ms,1537.16,results/final/timing_benchmark.csv,row 3
+T2_MegaDepth_Main,ALIKED-500,succ_10_deg,76.13,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-500 subset
+T2_MegaDepth_Main,ALIKED-500,auc_5_deg,39.46,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-500 subset
+T2_MegaDepth_Main,ALIKED-500,auc_10_deg,55.24,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-500 subset
+T2_MegaDepth_Main,ALIKED-500,auc_20_deg,68.42,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-500 subset
+T2_MegaDepth_Main,ALIKED-500,requested_n,500,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-500 subset
+T2_MegaDepth_Main,ALIKED-500,cum_actual_kp,497.47,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-500 subset
+T2_MegaDepth_Main,ALIKED-500,device,GPU,Protocol v2,GPU
+T2_MegaDepth_Main,ALIKED-500,latency_median_ms,264.81,results/final/timing_benchmark.csv,row 4
+T2_MegaDepth_Main,ALIKED-500,latency_mean_ms,347.37,results/final/timing_benchmark.csv,row 4
+T2_MegaDepth_Main,ALIKED-1000,succ_10_deg,77.67,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-1000 subset
+T2_MegaDepth_Main,ALIKED-1000,auc_5_deg,39.52,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-1000 subset
+T2_MegaDepth_Main,ALIKED-1000,auc_10_deg,55.46,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-1000 subset
+T2_MegaDepth_Main,ALIKED-1000,auc_20_deg,68.61,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-1000 subset
+T2_MegaDepth_Main,ALIKED-1000,requested_n,1000,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-1000 subset
+T2_MegaDepth_Main,ALIKED-1000,cum_actual_kp,976.97,results/phase4b/megadepth_stage2a_priority_evaluations.csv,ALIKED-1000 subset
+T2_MegaDepth_Main,ALIKED-1000,device,GPU,Protocol v2,GPU
+T2_MegaDepth_Main,ALIKED-1000,latency_median_ms,276.83,results/final/timing_benchmark.csv,row 5
+T2_MegaDepth_Main,ALIKED-1000,latency_mean_ms,389.95,results/final/timing_benchmark.csv,row 5
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),succ_10_deg,76.05,results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),auc_5_deg,39.55,results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),auc_10_deg,55.16,results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),auc_20_deg,68.23,results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),requested_n,Adaptive (500-1500),results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),cum_actual_kp,870.55,results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),device,GPU+CPU,Protocol v2,Hybrid
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),latency_median_ms,2087.53,results/final/timing_benchmark.csv,row 10
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),latency_mean_ms,2105.22,results/final/timing_benchmark.csv,row 10
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),succ_10_deg,78.87,results/phase5b/c2_fold_selected_cascades_summary.csv,row 4
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),auc_5_deg,41.37,results/phase5b/c2_fold_selected_cascades_summary.csv,row 4
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),auc_10_deg,57.58,results/phase5b/c2_fold_selected_cascades_summary.csv,row 4
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),auc_20_deg,70.90,results/phase5b/c2_fold_selected_cascades_summary.csv,row 4
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),requested_n,500-2000,results/phase5b/c2_fold_selected_cascades_summary.csv,row 4
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),cum_actual_kp,1529.96,results/phase5b/c2_fold_selected_cascades_summary.csv,row 4
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),device,GPU+CPU,Protocol v2,Hybrid
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),latency_median_ms,435.92,results/final/timing_benchmark.csv,row 6
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),latency_mean_ms,1029.4,results/final/timing_benchmark.csv,row 6
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),succ_10_deg,77.67,results/phase4b/megadepth_stage2a_priority_evaluations.csv,recomputed
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),auc_5_deg,39.52,results/phase4b/megadepth_stage2a_priority_evaluations.csv,recomputed
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),auc_10_deg,55.46,results/phase4b/megadepth_stage2a_priority_evaluations.csv,recomputed
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),auc_20_deg,68.61,results/phase4b/megadepth_stage2a_priority_evaluations.csv,recomputed
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),requested_n,500-1000,results/phase5b/f_gpu_benchmark.py,2-stage
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),cum_actual_kp,823.90,results/phase5b/f_gpu_benchmark.py,2-stage
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),device,GPU,Protocol v2,GPU
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),latency_median_ms,402.12,results/final/timing_benchmark.csv,row 7
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),latency_mean_ms,460.33,results/final/timing_benchmark.csv,row 7
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",succ_10_deg,82.13,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",auc_5_deg,43.32,results/phase4b/megadepth_stage2a_priority_evaluations.csv,recomputed
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",auc_10_deg,59.94,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",auc_20_deg,73.52,results/phase4b/megadepth_stage2a_priority_evaluations.csv,recomputed
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",requested_n,500 / 4000,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",cum_actual_kp,2013.49,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",device,GPU+CPU,Protocol v2,Hybrid
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",latency_median_ms,433.74,results/final/timing_benchmark.csv,row 8
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",latency_mean_ms,1055.53,results/final/timing_benchmark.csv,row 8
+T2_MegaDepth_Main,Always-Both,succ_10_deg,82.53,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 18
+T2_MegaDepth_Main,Always-Both,auc_5_deg,44.12,results/phase4b/megadepth_stage2a_priority_evaluations.csv,recomputed
+T2_MegaDepth_Main,Always-Both,auc_10_deg,60.47,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 18
+T2_MegaDepth_Main,Always-Both,auc_20_deg,74.02,results/phase4b/megadepth_stage2a_priority_evaluations.csv,recomputed
+T2_MegaDepth_Main,Always-Both,requested_n,4500,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 18
+T2_MegaDepth_Main,Always-Both,cum_actual_kp,4318.61,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 18
+T2_MegaDepth_Main,Always-Both,device,GPU+CPU,Protocol v2,Hybrid
+T2_MegaDepth_Main,Always-Both,latency_median_ms,1908.93,results/final/timing_benchmark.csv,row 9
+T2_MegaDepth_Main,Always-Both,latency_mean_ms,2084.16,results/final/timing_benchmark.csv,row 9
+T3_Cascade_Results,MegaDepth Fold 0 Selected,succ_10_deg,78.87,results/phase5b/c2_fold_selected_cascades_summary.csv,row 4
+T3_Cascade_Results,MegaDepth Fold 0 Selected,auc_10_deg,57.58,results/phase5b/c2_fold_selected_cascades_summary.csv,row 4
+T3_Cascade_Results,MegaDepth Fold 0 Selected,cum_kp,1529.96,results/phase5b/c2_fold_selected_cascades_summary.csv,row 4
+T3_Cascade_Results,MegaDepth Fold 0 Selected,step1_stop_rate,59.47,results/phase5b/c2_fold_selected_cascades_summary.csv,row 4
+T3_Cascade_Results,MegaDepth Fold 1 Selected,succ_10_deg,78.87,results/phase5b/c2_fold_selected_cascades_summary.csv,row 7
+T3_Cascade_Results,MegaDepth Fold 1 Selected,auc_10_deg,57.49,results/phase5b/c2_fold_selected_cascades_summary.csv,row 7
+T3_Cascade_Results,MegaDepth Fold 1 Selected,cum_kp,1642.44,results/phase5b/c2_fold_selected_cascades_summary.csv,row 7
+T3_Cascade_Results,MegaDepth Fold 1 Selected,step1_stop_rate,55.47,results/phase5b/c2_fold_selected_cascades_summary.csv,row 7
+T3_Cascade_Results,MegaDepth Fold 2 Selected,succ_10_deg,78.87,results/phase5b/c2_fold_selected_cascades_summary.csv,row 10
+T3_Cascade_Results,MegaDepth Fold 2 Selected,auc_10_deg,57.58,results/phase5b/c2_fold_selected_cascades_summary.csv,row 10
+T3_Cascade_Results,MegaDepth Fold 2 Selected,cum_kp,1529.96,results/phase5b/c2_fold_selected_cascades_summary.csv,row 10
+T3_Cascade_Results,MegaDepth Fold 2 Selected,step1_stop_rate,59.47,results/phase5b/c2_fold_selected_cascades_summary.csv,row 10
+T3_Cascade_Results,MegaDepth Fold 3 Selected,succ_10_deg,78.87,results/phase5b/c2_fold_selected_cascades_summary.csv,row 13
+T3_Cascade_Results,MegaDepth Fold 3 Selected,auc_10_deg,57.58,results/phase5b/c2_fold_selected_cascades_summary.csv,row 13
+T3_Cascade_Results,MegaDepth Fold 3 Selected,cum_kp,1529.96,results/phase5b/c2_fold_selected_cascades_summary.csv,row 13
+T3_Cascade_Results,MegaDepth Fold 3 Selected,step1_stop_rate,59.47,results/phase5b/c2_fold_selected_cascades_summary.csv,row 13
+T3_Cascade_Results,MegaDepth Fold 4 Selected,succ_10_deg,82.4,results/phase5b/c2_fold_selected_cascades_summary.csv,row 16
+T3_Cascade_Results,MegaDepth Fold 4 Selected,auc_10_deg,60.04,results/phase5b/c2_fold_selected_cascades_summary.csv,row 16
+T3_Cascade_Results,MegaDepth Fold 4 Selected,cum_kp,1909.65,results/phase5b/c2_fold_selected_cascades_summary.csv,row 16
+T3_Cascade_Results,MegaDepth Fold 4 Selected,step1_stop_rate,59.47,results/phase5b/c2_fold_selected_cascades_summary.csv,row 16
+T3_Cascade_Results,Cascade C6 (tau=0.40) Original,succ_10_deg,82.13,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T3_Cascade_Results,Cascade C6 (tau=0.40) Original,auc_10_deg,59.94,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T3_Cascade_Results,Cascade C6 (tau=0.40) Original,cum_kp,2013.49,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T3_Cascade_Results,Cascade C6 (tau=0.40) Permutation Mean,succ_10_deg,81.63,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T3_Cascade_Results,Cascade C6 (tau=0.40) Permutation Std,succ_10_deg,0.42,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T3_Cascade_Results,Cascade C6 (tau=0.40) Permutation Mean,auc_10_deg,58.57,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T3_Cascade_Results,Cascade C6 (tau=0.40) Permutation Std,auc_10_deg,0.24,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T3_Cascade_Results,Cascade C6 (tau=0.40) Permutation Mean,cum_kp,2025.25,results/phase5b/b2_permutation_robustness_all_pairs.csv,row 17
+T3_Cascade_Results,"Control: Cascade C* (tau=0.40, Full Proxy)",succ_10_deg,82.13,results/phase5b/d_controls_summary.csv,row 2
+T3_Cascade_Results,"Control: Cascade C* (tau=0.40, Full Proxy)",auc_10_deg,59.94,results/phase5b/d_controls_summary.csv,row 2
+T3_Cascade_Results,"Control: Cascade C* (tau=0.40, Full Proxy)",cum_kp,2013.49,results/phase5b/d_controls_summary.csv,row 2
+T3_Cascade_Results,"Control: Cascade C* (tau=0.40, Full Proxy)",stop_rate_pct,59.47,results/phase5b/d_controls_summary.csv,row 2
+T3_Cascade_Results,Control: (iv) Random-Escalation Control (20 Draws Mean),succ_10_deg,78.62,results/phase5b/d_controls_summary.csv,row 3
+T3_Cascade_Results,Control: (iv) Random-Escalation Control (20 Draws Mean),auc_10_deg,57.3,results/phase5b/d_controls_summary.csv,row 3
+T3_Cascade_Results,Control: (iv) Random-Escalation Control (20 Draws Mean),cum_kp,2040.64,results/phase5b/d_controls_summary.csv,row 3
+T3_Cascade_Results,Control: (iv) Random-Escalation Control (20 Draws Mean),stop_rate_pct,59.47,results/phase5b/d_controls_summary.csv,row 3
+T3_Cascade_Results,Control: (vi) Anti-Cascade (Escalate on HIGH proxy),succ_10_deg,76.33,results/phase5b/d_controls_summary.csv,row 4
+T3_Cascade_Results,Control: (vi) Anti-Cascade (Escalate on HIGH proxy),auc_10_deg,55.29,results/phase5b/d_controls_summary.csv,row 4
+T3_Cascade_Results,Control: (vi) Anti-Cascade (Escalate on HIGH proxy),cum_kp,2082.01,results/phase5b/d_controls_summary.csv,row 4
+T3_Cascade_Results,Control: (vi) Anti-Cascade (Escalate on HIGH proxy),stop_rate_pct,59.47,results/phase5b/d_controls_summary.csv,row 4
+T3_Cascade_Results,Control: (vii.a) Inlier Count Alone (Cross-Scene),succ_10_deg,82.07,results/phase5b/d_controls_summary.csv,row 5
+T3_Cascade_Results,Control: (vii.a) Inlier Count Alone (Cross-Scene),auc_10_deg,59.86,results/phase5b/d_controls_summary.csv,row 5
+T3_Cascade_Results,Control: (vii.a) Inlier Count Alone (Cross-Scene),cum_kp,2000.57,results/phase5b/d_controls_summary.csv,row 5
+T3_Cascade_Results,Control: (vii.a) Inlier Count Alone (Cross-Scene),stop_rate_pct,59.93,results/phase5b/d_controls_summary.csv,row 5
+T3_Cascade_Results,Control: (vii.b) Inlier Ratio Alone (Cross-Scene),succ_10_deg,81.2,results/phase5b/d_controls_summary.csv,row 6
+T3_Cascade_Results,Control: (vii.b) Inlier Ratio Alone (Cross-Scene),auc_10_deg,59.24,results/phase5b/d_controls_summary.csv,row 6
+T3_Cascade_Results,Control: (vii.b) Inlier Ratio Alone (Cross-Scene),cum_kp,2337.58,results/phase5b/d_controls_summary.csv,row 6
+T3_Cascade_Results,Control: (vii.b) Inlier Ratio Alone (Cross-Scene),stop_rate_pct,49.87,results/phase5b/d_controls_summary.csv,row 6
+T3_Cascade_Results,Control: (vii.c) Sampson Reproj Factor Alone (Cross-Scene),succ_10_deg,79.67,results/phase5b/d_controls_summary.csv,row 7
+T3_Cascade_Results,Control: (vii.c) Sampson Reproj Factor Alone (Cross-Scene),auc_10_deg,57.9,results/phase5b/d_controls_summary.csv,row 7
+T3_Cascade_Results,Control: (vii.c) Sampson Reproj Factor Alone (Cross-Scene),cum_kp,2217.64,results/phase5b/d_controls_summary.csv,row 7
+T3_Cascade_Results,Control: (vii.c) Sampson Reproj Factor Alone (Cross-Scene),stop_rate_pct,54.0,results/phase5b/d_controls_summary.csv,row 7
+T4_Policy_Behaviour,HPatches L1 Fold 0,ALIKED_count,85,results/phase3/level1_selection_stats.csv,row 2
+T4_Policy_Behaviour,HPatches L1 Fold 0,SIFT_count,29,results/phase3/level1_selection_stats.csv,row 2
+T4_Policy_Behaviour,HPatches L1 Fold 0,entropy,0.883,results/phase3/level1_selection_stats.csv,row 2
+T4_Policy_Behaviour,HPatches L1 Fold 1,ALIKED_count,115,results/phase3/level1_selection_stats.csv,row 3
+T4_Policy_Behaviour,HPatches L1 Fold 1,SIFT_count,0,results/phase3/level1_selection_stats.csv,row 3
+T4_Policy_Behaviour,HPatches L1 Fold 1,entropy,0.0,results/phase3/level1_selection_stats.csv,row 3
+T4_Policy_Behaviour,HPatches L1 Fold 2,ALIKED_count,115,results/phase3/level1_selection_stats.csv,row 4
+T4_Policy_Behaviour,HPatches L1 Fold 2,SIFT_count,0,results/phase3/level1_selection_stats.csv,row 4
+T4_Policy_Behaviour,HPatches L1 Fold 2,entropy,0.0,results/phase3/level1_selection_stats.csv,row 4
+T4_Policy_Behaviour,HPatches L1 Fold 3,ALIKED_count,115,results/phase3/level1_selection_stats.csv,row 5
+T4_Policy_Behaviour,HPatches L1 Fold 3,SIFT_count,0,results/phase3/level1_selection_stats.csv,row 5
+T4_Policy_Behaviour,HPatches L1 Fold 3,entropy,0.0,results/phase3/level1_selection_stats.csv,row 5
+T4_Policy_Behaviour,HPatches L1 Fold 4,ALIKED_count,120,results/phase3/level1_selection_stats.csv,row 6
+T4_Policy_Behaviour,HPatches L1 Fold 4,SIFT_count,0,results/phase3/level1_selection_stats.csv,row 6
+T4_Policy_Behaviour,HPatches L1 Fold 4,entropy,0.0,results/phase3/level1_selection_stats.csv,row 6
+T4_Policy_Behaviour,HPatches L1 Fold Pooled,ALIKED_count,550,results/phase3/level1_selection_stats.csv,row 7
+T4_Policy_Behaviour,HPatches L1 Fold Pooled,SIFT_count,29,results/phase3/level1_selection_stats.csv,row 7
+T4_Policy_Behaviour,HPatches L1 Fold Pooled,entropy,0.305,results/phase3/level1_selection_stats.csv,row 7
+T4_Policy_Behaviour,MegaDepth Fold 0,preset_distribution,"{'ALIKED': 1013, 'SIFT': 487}",results/phase5b/a4_stage3_fixed_summary.csv,row 2
+T4_Policy_Behaviour,MegaDepth Fold 0,pct_stopped_step_1,67.8,results/phase5b/a4_stage3_fixed_summary.csv,row 2
+T4_Policy_Behaviour,MegaDepth Fold 0,mean_steps,1.57,results/phase5b/a4_stage3_fixed_summary.csv,row 2
+T4_Policy_Behaviour,MegaDepth Fold 0,first_act0_plus500,2.47,results/phase5b/a4_stage3_fixed_summary.csv,row 2
+T4_Policy_Behaviour,MegaDepth Fold 0,first_act1_plus1000,29.73,results/phase5b/a4_stage3_fixed_summary.csv,row 2
+T4_Policy_Behaviour,MegaDepth Fold 0,first_act3_STOP,67.8,results/phase5b/a4_stage3_fixed_summary.csv,row 2
+T4_Policy_Behaviour,MegaDepth Fold 1,preset_distribution,{'ALIKED': 1500},results/phase5b/a4_stage3_fixed_summary.csv,row 3
+T4_Policy_Behaviour,MegaDepth Fold 1,pct_stopped_step_1,87.27,results/phase5b/a4_stage3_fixed_summary.csv,row 3
+T4_Policy_Behaviour,MegaDepth Fold 1,mean_steps,1.13,results/phase5b/a4_stage3_fixed_summary.csv,row 3
+T4_Policy_Behaviour,MegaDepth Fold 1,first_act0_plus500,12.67,results/phase5b/a4_stage3_fixed_summary.csv,row 3
+T4_Policy_Behaviour,MegaDepth Fold 1,first_act1_plus1000,0.07,results/phase5b/a4_stage3_fixed_summary.csv,row 3
+T4_Policy_Behaviour,MegaDepth Fold 1,first_act3_STOP,87.27,results/phase5b/a4_stage3_fixed_summary.csv,row 3
+T4_Policy_Behaviour,MegaDepth Fold 2,preset_distribution,{'ALIKED': 1500},results/phase5b/a4_stage3_fixed_summary.csv,row 4
+T4_Policy_Behaviour,MegaDepth Fold 2,pct_stopped_step_1,87.0,results/phase5b/a4_stage3_fixed_summary.csv,row 4
+T4_Policy_Behaviour,MegaDepth Fold 2,mean_steps,1.13,results/phase5b/a4_stage3_fixed_summary.csv,row 4
+T4_Policy_Behaviour,MegaDepth Fold 2,first_act0_plus500,12.07,results/phase5b/a4_stage3_fixed_summary.csv,row 4
+T4_Policy_Behaviour,MegaDepth Fold 2,first_act1_plus1000,0.93,results/phase5b/a4_stage3_fixed_summary.csv,row 4
+T4_Policy_Behaviour,MegaDepth Fold 2,first_act3_STOP,87.0,results/phase5b/a4_stage3_fixed_summary.csv,row 4
+T4_Policy_Behaviour,MegaDepth Fold 3,preset_distribution,{'ALIKED': 1500},results/phase5b/a4_stage3_fixed_summary.csv,row 5
+T4_Policy_Behaviour,MegaDepth Fold 3,pct_stopped_step_1,65.53,results/phase5b/a4_stage3_fixed_summary.csv,row 5
+T4_Policy_Behaviour,MegaDepth Fold 3,mean_steps,1.38,results/phase5b/a4_stage3_fixed_summary.csv,row 5
+T4_Policy_Behaviour,MegaDepth Fold 3,first_act0_plus500,10.13,results/phase5b/a4_stage3_fixed_summary.csv,row 5
+T4_Policy_Behaviour,MegaDepth Fold 3,first_act1_plus1000,24.33,results/phase5b/a4_stage3_fixed_summary.csv,row 5
+T4_Policy_Behaviour,MegaDepth Fold 3,first_act3_STOP,65.53,results/phase5b/a4_stage3_fixed_summary.csv,row 5
+T4_Policy_Behaviour,MegaDepth Fold 4,preset_distribution,"{'ALIKED': 1495, 'KAZE': 3, 'SIFT': 2}",results/phase5b/a4_stage3_fixed_summary.csv,row 6
+T4_Policy_Behaviour,MegaDepth Fold 4,pct_stopped_step_1,94.73,results/phase5b/a4_stage3_fixed_summary.csv,row 6
+T4_Policy_Behaviour,MegaDepth Fold 4,mean_steps,1.05,results/phase5b/a4_stage3_fixed_summary.csv,row 6
+T4_Policy_Behaviour,MegaDepth Fold 4,first_act0_plus500,5.07,results/phase5b/a4_stage3_fixed_summary.csv,row 6
+T4_Policy_Behaviour,MegaDepth Fold 4,first_act1_plus1000,0.2,results/phase5b/a4_stage3_fixed_summary.csv,row 6
+T4_Policy_Behaviour,MegaDepth Fold 4,first_act3_STOP,94.73,results/phase5b/a4_stage3_fixed_summary.csv,row 6
+T4_Policy_Behaviour,MegaDepth Pooled (All 5 Folds),preset_distribution,"{'ALIKED': 7008, 'SIFT': 489, 'KAZE': 3}",results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T4_Policy_Behaviour,MegaDepth Pooled (All 5 Folds),pct_stopped_step_1,80.47,results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T4_Policy_Behaviour,MegaDepth Pooled (All 5 Folds),mean_steps,1.25,results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T4_Policy_Behaviour,MegaDepth Pooled (All 5 Folds),first_act0_plus500,8.48,results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T4_Policy_Behaviour,MegaDepth Pooled (All 5 Folds),first_act1_plus1000,11.05,results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T4_Policy_Behaviour,MegaDepth Pooled (All 5 Folds),first_act3_STOP,80.47,results/phase5b/a4_stage3_fixed_summary.csv,row 7
+T5_Audit_Table,HPatches Evaluation Metric,old_leaky_value,Corner error evaluated on test with GT reward leak,results/phase1b/honest_all_presets_test.csv vs results/phase3/folds_summary_table.csv,audit item 1
+T5_Audit_Table,HPatches Evaluation Metric,honest_value,"AUC@3px = 46.81%, Succ@3px = 72.41% under honest protocol",results/phase1b/honest_all_presets_test.csv vs results/phase3/folds_summary_table.csv,audit item 1
+T5_Audit_Table,HPatches Evaluation Metric,root_cause_reason,Phase 1 used ground-truth homography corner error inside reward loop and leaky data splits.,results/phase1b/honest_all_presets_test.csv vs results/phase3/folds_summary_table.csv,audit item 1
+T5_Audit_Table,MegaDepth AFM-RL v1 Action Mapping,old_leaky_value,"Succ@10 = 74.20%, KP = 100.0, 100% STOP",results/phase5/megadepth_stage3_afm_rl_rollouts.csv vs results/phase5b/megadepth_stage3_afm_rl_v1_fixed.csv,audit item 2
+T5_Audit_Table,MegaDepth AFM-RL v1 Action Mapping,honest_value,"Succ@10 = 76.05%, KP = 870.55, 80.47% STOP",results/phase5/megadepth_stage3_afm_rl_rollouts.csv vs results/phase5b/megadepth_stage3_afm_rl_v1_fixed.csv,audit item 2
+T5_Audit_Table,MegaDepth AFM-RL v1 Action Mapping,root_cause_reason,"src/megadepth_eval_env.py mapped actions to [-500, -250, +250, +500] instead of [+500, +1000, -500, STOP], forcing immediate depletion.",results/phase5/megadepth_stage3_afm_rl_rollouts.csv vs results/phase5b/megadepth_stage3_afm_rl_v1_fixed.csv,audit item 2
+T5_Audit_Table,Cascade C4 Protocol Definition,old_leaky_value,C4: ALIKED-500 -> ALIKED-1000 (KP = 823.90),results/phase4b/PROTOCOL_v2_AMENDMENT_1.md vs results/phase5b/f_gpu_benchmark.py,audit item 3
+T5_Audit_Table,Cascade C4 Protocol Definition,honest_value,C4: ALIKED-500 -> SIFT-1000 -> ALIKED-2000 (KP = 1529.96),results/phase4b/PROTOCOL_v2_AMENDMENT_1.md vs results/phase5b/f_gpu_benchmark.py,audit item 3
+T5_Audit_Table,Cascade C4 Protocol Definition,root_cause_reason,Phase 5b text and GPU benchmark script used a 2-stage GPU abbreviation rather than the committed 3-stage definition.,results/phase4b/PROTOCOL_v2_AMENDMENT_1.md vs results/phase5b/f_gpu_benchmark.py,audit item 3
+T5_Audit_Table,MegaDepth Bootstrap Discrepancy,old_leaky_value,"DeltaSucc = -1.93%, DeltaAUC = -2.89",results/phase5b/a4_bootstrap_comparisons.csv vs results/final/a1_bootstrap_comparisons_fixed.csv,audit item 4
+T5_Audit_Table,MegaDepth Bootstrap Discrepancy,honest_value,"DeltaSucc = -0.08% [-0.66%, +0.50%], DeltaAUC = -0.07 [-0.53, +0.37]",results/phase5b/a4_bootstrap_comparisons.csv vs results/final/a1_bootstrap_comparisons_fixed.csv,audit item 4
+T5_Audit_Table,MegaDepth Bootstrap Discrepancy,root_cause_reason,finish_a4_summaries.py averaged pose error across folds before thresholding and used a linear piecewise approximation rather than trapezoidal integration across reference-image clusters.,results/phase5b/a4_bootstrap_comparisons.csv vs results/final/a1_bootstrap_comparisons_fixed.csv,audit item 4
+T5_Audit_Table,HPatches RANSAC Reproducibility,old_leaky_value,cv2.setRNGSeed hook flagged as source of non-determinism,results/phase4b/a1_reproducibility_check.csv,audit item 5
+T5_Audit_Table,HPatches RANSAC Reproducibility,honest_value,Hook had zero effect on cv2.findHomography; correspondence ordering is the sole source of RANSAC selection noise,results/phase4b/a1_reproducibility_check.csv,audit item 5
+T5_Audit_Table,HPatches RANSAC Reproducibility,root_cause_reason,OpenCV cv2.findHomography RANSAC uses an internal deterministic seed; random permutation of correspondence rows produces +-0.3% to +-0.8% selection noise.,results/phase4b/a1_reproducibility_check.csv,audit item 5

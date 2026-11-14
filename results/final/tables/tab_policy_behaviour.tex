@@ -1,0 +1,29 @@
+% Data Table T4: Policy Behaviour, Preset Entropy & Action Telemetry
+% Source: results/final/all_results.csv (T4_Policy_Behaviour)
+\begin{table*}[t]
+\centering
+\caption{Policy behavioral telemetry across HPatches (5 folds) and MegaDepth (zero-shot transfer). Level 1 measures preset selection entropy (in bits) over the 14-preset action space. Level 2 measures initial action distribution and termination step counts.}
+\label{tab:policy_behaviour}
+\small
+\begin{tabular}{lcccccc}
+\hline
+\textbf{Split / Benchmark} & \textbf{Total Pairs} & \textbf{ALIKED Share (\%)} & \textbf{SIFT Share (\%)} & \textbf{L1 Entropy (bits)} & \textbf{Step 1 STOP (\%)} & \textbf{Mean Steps} \\
+\hline
+\multicolumn{7}{l}{\textit{HPatches 5-Fold Test Evaluation (In-Distribution)}} \\
+Fold 0 & 115 & 73.91 (85/115) & 25.22 (29/115) & 0.883 & 100.00 & 1.00 \\
+Fold 1 & 115 & 100.00 (115/115) & 0.00 (0/115) & 0.000 & 100.00 & 1.00 \\
+Fold 2 & 115 & 100.00 (115/115) & 0.00 (0/115) & 0.000 & 100.00 & 1.00 \\
+Fold 3 & 115 & 100.00 (115/115) & 0.00 (0/115) & 0.000 & 100.00 & 1.00 \\
+Fold 4 & 120 & 100.00 (120/120) & 0.00 (0/120) & 0.000 & 100.00 & 1.00 \\
+Pooled HPatches & 580 & 94.83 (550/580) & 5.00 (29/580) & 0.305 & 100.00 & 1.00 \\
+\hline
+\multicolumn{7}{l}{\textit{MegaDepth-1500 Evaluation (Zero-Shot Transfer)}} \\
+Fold 0 Policy & 1500 & 67.53 (1013/1500) & 32.47 (487/1500) & 0.909 & 67.80 & 1.57 \\
+Fold 1 Policy & 1500 & 100.00 (1500/1500) & 0.00 (0/1500) & 0.000 & 87.27 & 1.13 \\
+Fold 2 Policy & 1500 & 100.00 (1500/1500) & 0.00 (0/1500) & 0.000 & 87.00 & 1.13 \\
+Fold 3 Policy & 1500 & 100.00 (1500/1500) & 0.00 (0/1500) & 0.000 & 65.53 & 1.38 \\
+Fold 4 Policy & 1500 & 99.67 (1495/1500) & 0.13 (2/1500) & 0.024 & 94.73 & 1.05 \\
+Pooled MegaDepth & 7500 & 93.44 (7008/7500) & 6.52 (489/7500) & 0.354 & 80.47 & 1.25 \\
+\hline
+\end{tabular}
+\end{table*}

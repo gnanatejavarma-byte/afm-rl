@@ -1,0 +1,31 @@
+% Data Table T2: MegaDepth Main (1,500 Pairs)
+% Source: results/final/all_results.csv (T2_MegaDepth_Main)
+\begin{table*}[t]
+\centering
+\caption{MegaDepth-1500 benchmark performance across 1,500 pairs (Scenes 0015 and 0022). Metrics report pose recall (Succ@10°) and pose AUC curves up to 5°, 10°, and 20°. Computational overhead accounts for cumulative keypoints evaluated and wall-clock execution time on identical hardware (PyTorch CUDA on NVIDIA RTX 3050 Laptop GPU, Intel Core CPU).}
+\label{tab:megadepth_main}
+\small
+\begin{tabular}{lcccccccc}
+\hline
+\textbf{Method} & \textbf{Device} & \textbf{Succ@10° (\%)} & \textbf{AUC@5°} & \textbf{AUC@10°} & \textbf{AUC@20°} & \textbf{Req. N} & \textbf{Cum. KP} & \textbf{Latency (ms)} \\
+\hline
+\multicolumn{9}{l}{\textit{Fixed Baselines}} \\
+SIFT-500 & CPU & 35.80 & 14.19 & 23.32 & 33.37 & 500 & 496.26 & 948.3 \\
+SIFT-1000 & CPU & 55.40 & 26.85 & 38.83 & 49.92 & 1000 & 993.43 & 1182.4 \\
+SIFT-2000 & CPU & 66.80 & 33.91 & 46.14 & 57.51 & 2000 & 1989.67 & 1286.3 \\
+SIFT-4000 & CPU & 77.20 & 39.73 & 54.78 & 67.43 & 4000 & 3821.14 & 1456.1 \\
+ALIKED-500 & GPU & 76.13 & 39.46 & 55.24 & 68.42 & 500 & 497.47 & 264.8 \\
+ALIKED-1000 & GPU & 77.67 & 39.52 & 55.46 & 68.61 & 1000 & 976.97 & 276.8 \\
+\hline
+\multicolumn{9}{l}{\textit{RL Policy \& Pre-Registered Cascades}} \\
+AFM-RL v1 (Fixed Rerun) & GPU+CPU & 76.05 & 39.55 & 55.16 & 68.23 & Adaptive & 870.55 & 2087.5 \\
+Cascade C4 (3-Stage Committed) & GPU+CPU & 78.87 & 41.37 & 57.58 & 70.90 & 500--2000 & 1529.96 & 435.9 \\
+Cascade C4 (2-Stage GPU-Only) & GPU & 77.67 & 39.52 & 55.46 & 68.61 & 500--1000 & 823.90 & 402.1 \\
+\hline
+\multicolumn{9}{l}{\textit{Exploratory Extension \& Upper Bound}} \\
+Cascade C6 ($\tau=0.40$, Post-hoc) & GPU+CPU & 82.13 & 43.32 & 59.94 & 73.52 & 500 / 4000 & 2013.49 & 433.7 \\
+Always-Both (AL500 + SI4k) & GPU+CPU & 82.53 & 44.12 & 60.47 & 74.02 & 4500 & 4318.61 & 1908.9 \\
+Oracle-of-Two (AL500 / SI4k)* & Bound & 87.53 & 52.14 & 68.38 & 80.12 & 4000 & 4318.61 & -- \\
+\hline
+\end{tabular}
+\end{table*}

@@ -1,0 +1,23 @@
+% Data Table T5: Methodological Audit & Discrepancy Reconciliation
+% Source: results/final/all_results.csv (T5_Audit_Table)
+\begin{table*}[t]
+\centering
+\caption{Systematic audit of discrepancies between earlier drafts and frozen results. All values recomputed from raw per-pair match records.}
+\label{tab:audit_table}
+\small
+\begin{tabular}{p{3.5cm}p{3.5cm}p{3.5cm}p{5.5cm}}
+\hline
+\textbf{Issue / Claim} & \textbf{Old Value (Leaky / Bugged)} & \textbf{Honest Value (Frozen)} & \textbf{Root Cause / Mechanism} \\
+\hline
+HPatches SIFT Performance & Succ@3px = 84.8\% & Succ@3px = 72.93\% & Phase 1 evaluated on test set with ground-truth corner error inside reward loop and non-disjoint train/test splits. \\
+\hline
+MegaDepth AFM-RL v1 Action Mapping & Succ@10° = 74.20\%, Cum KP = 100.0, 100\% STOP & Succ@10° = 76.05\%, Cum KP = 870.55, 80.47\% STOP & Environment bug: \texttt{src/megadepth\_eval\_env.py} mapped actions 0..3 to $[-500, -250, +250, +500]$ instead of $[+500, +1000, -500, \text{STOP}]$, forcing depletion. Corrected in Phase 5b. \\
+\hline
+Cascade C4 Definition Nomenclature & C4: ALIKED-500 $\to$ ALIKED-1000 (KP = 823.90) & C4: ALIKED-500 $\to$ SIFT-1000 $\to$ ALIKED-2000 (KP = 1529.96) & Protocol v2 Amendment 1 pre-registered 3-stage C4. A 2-stage GPU abbreviation was tested in text/benchmark. Both are reported side-by-side. \\
+\hline
+MegaDepth Clustered Bootstrap & $\Delta\text{Succ@10°} = -1.93\%$, $\Delta\text{AUC@10°} = -2.89$ & $\Delta\text{Succ@10°} = -0.08\%$ $[-0.66\%, +0.50\%]$, $\Delta\text{AUC@10°} = -0.07$ $[-0.53, +0.37]$ & Earlier bootstrap averaged pose error across folds before thresholding $< 10.0$ and used piecewise linear approximation. Corrected via reference-image cluster bootstrap. \\
+\hline
+RANSAC Seed Reproducibility & \texttt{cv2.setRNGSeed} hook caused variation & Hook had zero effect; correspondence order is sole noise source & OpenCV's \texttt{cv2.findHomography} uses internal deterministic RANSAC seed; correspondence order variation produces $\pm 0.3\%$ to $\pm 0.8\%$ selection noise. \\
+\hline
+\end{tabular}
+\end{table*}

@@ -1,0 +1,35 @@
+% Data Table T3: Cascade Results, Robustness & Component Studies
+% Source: results/final/all_results.csv (T3_Cascade_Results)
+\begin{table*}[t]
+\centering
+\caption{Detailed evaluation of feature cascades on MegaDepth-1500: cross-validation fold selections, correspondence permutation sensitivity, and ablation controls. All cascades use unsupervised epipolar proxy $\hat{P}_{epi}$ for escalation decisions.}
+\label{tab:cascade_results}
+\small
+\begin{tabular}{lcccccc}
+\hline
+\textbf{Cascade / Control Setup} & \textbf{Protocol Status} & \textbf{Succ@10° (\%)} & \textbf{AUC@10°} & \textbf{Cum. KP} & \textbf{Stop Rate (\%)} & \textbf{Escalation (\%)} \\
+\hline
+\multicolumn{7}{l}{\textit{Fold-Selected Cascades (Protocol v2 Amendment 1)}} \\
+Fold 0: C4 ($\tau=0.40$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.58 & 1529.96 & 59.47 & 40.53 \\
+Fold 1: C4 ($\tau=0.45$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.49 & 1642.44 & 55.47 & 44.53 \\
+Fold 2: C4 ($\tau=0.40$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.58 & 1529.96 & 59.47 & 40.53 \\
+Fold 3: C4 ($\tau=0.40$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.58 & 1529.96 & 59.47 & 40.53 \\
+Fold 4: C2 ($\tau=0.40$, AL500 $\to$ AL1k $\to$ SI4k) & Pre-registered & 82.40 & 60.04 & 1909.65 & 59.47 & 40.53 \\
+Pooled Fold-Selected Ensemble & Pre-registered & 79.57 & 58.07 & 1608.40 & 58.67 & 41.33 \\
+\hline
+\multicolumn{7}{l}{\textit{Post-Hoc Cascade C6 ($\tau=0.40$, ALIKED-500 $\to$ SIFT-4000) Permutation Robustness}} \\
+Original Match Ordering & Post-hoc & 82.13 & 59.94 & 2013.49 & 59.47 & 40.53 \\
+Permutation 1 & Post-hoc & 82.00 & 59.88 & 2018.12 & 59.27 & 40.73 \\
+Permutation 2 & Post-hoc & 82.40 & 60.05 & 2009.84 & 59.60 & 40.40 \\
+Permutation 3 & Post-hoc & 82.20 & 59.98 & 2012.30 & 59.40 & 40.60 \\
+Permutation Mean $\pm$ Std & Post-hoc & $82.18 \pm 0.16$ & $59.96 \pm 0.08$ & $2013.44 \pm 3.48$ & $59.43 \pm 0.14$ & $40.57 \pm 0.14$ \\
+\hline
+\multicolumn{7}{l}{\textit{Component Ablations \& Calibration Controls}} \\
+Random-Escalation Control (20 Draws Mean) & Control & $78.62 \pm 0.44$ & $57.30 \pm 0.34$ & 2040.64 & 59.47 & 40.53 \\
+Anti-Cascade (Escalate on HIGH proxy) & Control & 76.33 & 55.29 & 2082.01 & 59.47 & 40.53 \\
+Inlier Count Alone (Threshold 125, Cross-Scene) & Control & 82.07 & 59.86 & 2000.57 & 59.93 & 40.07 \\
+Inlier Ratio Alone (Cross-Scene) & Control & 81.20 & 59.24 & 2337.58 & 49.87 & 50.13 \\
+Reprojection Factor Alone (Cross-Scene) & Control & 79.67 & 57.90 & 2217.64 & 54.00 & 46.00 \\
+\hline
+\end{tabular}
+\end{table*}
