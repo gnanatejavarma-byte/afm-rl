@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
+\usepackage{url}
 \graphicspath{{images/}}
 
 \begin{document}
@@ -158,7 +159,7 @@ with fundamental matrix $\mathbf{F} = \mathbf{K}_2^{-T} \mathbf{E} \mathbf{K}_1^
     \STATE $(D_k, N_k) \leftarrow \mathcal{C}[k]$
     \STATE $\mathcal{P}_1, \mathcal{P}_2 \leftarrow \text{ExtractKeypoints}(\mathbf{I}_1, \mathbf{I}_2, D_k, N_k)$
     \STATE $\mathcal{M}_k \leftarrow \text{MatchDescriptors}(\mathcal{P}_1, \mathcal{P}_2, \text{ratio}=0.75)$
-    \STATE $\mathbf{E}_k, \text{mask}_k, \bar{e}_s \leftarrow \text{EssentialRANSAC}(\mathcal{M}_k, \mathbf{K}_1, \mathbf{K}_2, \text{thr}=0.5)$
+    \STATE $\mathbf{E}_k, \mathbf{m}_k, \bar{e}_s \leftarrow \text{EssentialRANSAC}(\mathcal{M}_k, \mathbf{K}_1, \mathbf{K}_2)$
     \STATE $p_k \leftarrow \text{ComputeEpipolarProxy}(\mathcal{M}_k, \text{mask}_k, \bar{e}_s)$
     \IF{$p_k > p^*$}
         \STATE $p^* \leftarrow p_k$, $\mathcal{M}^* \leftarrow \mathcal{M}_k$, $k^* \leftarrow k$
@@ -215,10 +216,10 @@ All timing measurements are performed under cold cache conditions on identical d
 % Data Table T1: HPatches Main (116 Sequences, 5 Folds)
 \begin{table*}[t]
 \centering
-\setlength{\tabcolsep}{3.5pt}
+\setlength{\tabcolsep}{2.5pt}
+\footnotesize
 \caption{HPatches 5-fold frozen evaluation across all 116 sequences (580 test pairs). All metrics evaluated under honest label-free protocol without test-time ground truth. Primary comparison deltas (P1--P5) include sequence-clustered bootstrap 95\% confidence intervals (10,000 resamples). $^*$Label-using upper bound; in-sample.}
 \label{tab:hpatches_main}
-\small
 \begin{tabular}{lcccccccc}
 \hline
 \textbf{Method} & \textbf{Eval Type} & \textbf{Succ@3px (\%)} & \textbf{AUC@1px} & \textbf{AUC@3px} & \textbf{AUC@5px} & \textbf{Final KP} & \textbf{Cum. KP} & \textbf{Steps} \\
@@ -271,11 +272,10 @@ We observe an informative metric divergence between Success@3px and AUC@3px. Suc
 % Data Table T2: MegaDepth Main (1,500 Pairs)
 \begin{table*}[t]
 \centering
-\setlength{\tabcolsep}{3.0pt}
+\setlength{\tabcolsep}{2.5pt}
 \footnotesize
 \caption{MegaDepth-1500 benchmark performance across 1,500 pairs (Scenes 0015 and 0022). Metrics report pose recall ($\text{Succ}@10^\circ$) and pose AUC curves up to $5^\circ$, $10^\circ$, and $20^\circ$. Computational overhead accounts for cumulative keypoints evaluated and wall-clock execution time on identical dedicated hardware (NVIDIA RTX 3050 Laptop GPU, Intel Core \texttt{i5-12450H} CPU).}
 \label{tab:megadepth_main}
-\small
 \begin{tabular}{lcccccccc}
 \hline
 \textbf{Method} & \textbf{Device} & \textbf{Succ@10$^\circ$ (\%)} & \textbf{AUC@5$^\circ$} & \textbf{AUC@10$^\circ$} & \textbf{AUC@20$^\circ$} & \textbf{Req. N} & \textbf{Cum. KP} & \textbf{Latency (ms)} \\
@@ -322,9 +322,10 @@ The post-hoc two-stage cascade $C_6$ ($\tau = 0.40$) achieves $82.13\%$ Succ@$10
 % Data Table T3: Policy Behaviour, Preset Entropy & Action Telemetry
 \begin{table*}[t]
 \centering
+\setlength{\tabcolsep}{4.0pt}
+\footnotesize
 \caption{Policy behavioral telemetry across HPatches (5 folds) and MegaDepth (zero-shot transfer). Level 1 measures preset selection entropy (in bits) over the 14-preset action space. Level 2 measures initial action distribution and termination step counts.}
 \label{tab:policy_behaviour}
-\small
 \begin{tabular}{lcccccc}
 \hline
 \textbf{Split / Benchmark} & \textbf{Total Pairs} & \textbf{ALIKED Share (\%)} & \textbf{SIFT Share (\%)} & \textbf{L1 Entropy (bits)} & \textbf{Step 1 STOP (\%)} & \textbf{Mean Steps} \\
@@ -370,11 +371,10 @@ We hypothesize that this premature stopping stems from the step tax ($c_{\text{s
 % Data Table T4: Cascade Results, Robustness & Component Studies
 \begin{table*}[t]
 \centering
-\setlength{\tabcolsep}{3.0pt}
+\setlength{\tabcolsep}{2.5pt}
 \footnotesize
 \caption{Detailed evaluation of feature cascades on MegaDepth-1500: cross-validation fold selections, reference-image cluster bootstrap comparisons (10,000 resamples), correspondence permutation sensitivity, and ablation controls. All cascades use unsupervised epipolar proxy $\hat{P}_{epi}$ for escalation decisions.}
 \label{tab:cascade_results}
-\small
 \begin{tabular}{lcccccc}
 \hline
 \textbf{Cascade / Control Setup} & \textbf{Protocol Status} & \textbf{Succ@10$^\circ$ (\%)} & \textbf{AUC@10$^\circ$} & \textbf{Cum. KP} & \textbf{Stop Rate (\%)} & \textbf{Escalation (\%)} \\
