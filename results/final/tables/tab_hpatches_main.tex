@@ -1,7 +1,8 @@
 % Data Table T1: HPatches Main (116 Sequences, 5 Folds)
-% Source: results/final/all_results.csv (T1_HPatches_Main)
+% Generated programmatically by results/final/regenerate_tables.py
 \begin{table*}[t]
 \centering
+\setlength{\tabcolsep}{3.5pt}
 \caption{HPatches 5-fold frozen evaluation across all 116 sequences (580 test pairs). All metrics evaluated under honest label-free protocol without test-time ground truth. Primary comparison deltas (P1--P5) include sequence-clustered bootstrap 95\% confidence intervals (10,000 resamples).}
 \label{tab:hpatches_main}
 \small
@@ -10,26 +11,30 @@
 \textbf{Method} & \textbf{Eval Type} & \textbf{Succ@3px (\%)} & \textbf{AUC@1px} & \textbf{AUC@3px} & \textbf{AUC@5px} & \textbf{Final KP} & \textbf{Cum. KP} & \textbf{Steps} \\
 \hline
 \multicolumn{9}{l}{\textit{Fixed Baselines (Frozen Grid)}} \\
-SIFT-500 & Pooled (580) & 67.59 & 18.32 & 44.68 & 53.41 & 500 & 500 & 1.00 \\
-SIFT-1000 & Pooled (580) & 71.21 & 19.88 & 47.50 & 56.45 & 1000 & 1000 & 1.00 \\
-SIFT-2000 & Pooled (580) & 72.76 & 20.91 & 49.01 & 57.98 & 2000 & 2000 & 1.00 \\
-SIFT-4000 & Pooled (580) & 72.93 & 22.39 & 51.13 & 59.98 & 4000 & 4000 & 1.00 \\
-ALIKED-500 & Pooled (580) & 72.59 & 20.25 & 46.88 & 55.89 & 500 & 500 & 1.00 \\
-ALIKED-1000 & Pooled (580) & 73.62 & 20.73 & 47.56 & 56.54 & 1000 & 1000 & 1.00 \\
-XFeat-1000 & Pooled (580) & 71.90 & 20.15 & 47.21 & 56.02 & 1000 & 1000 & 1.00 \\
-Best Fixed (Fold VAL) & Pooled (580) & 73.97 & 21.64 & 49.64 & 58.62 & 4000 & 4000 & 1.00 \\
+SIFT-500 & Pooled (580) & 59.66 & 16.40 & 38.89 & 49.86 & 500 & 500 & 1.00 \\
+SIFT-1000 & Pooled (580) & 67.59 & 21.09 & 45.42 & 56.65 & 1000 & 1000 & 1.00 \\
+SIFT-2000 & Pooled (580) & 72.76 & 24.74 & 49.02 & 60.51 & 1975.23 & 1975.23 & 1.00 \\
+SIFT-4000 & Pooled (580) & 72.93 & 26.94 & 51.12 & 62.00 & 3590.86 & 3590.86 & 1.00 \\
+ALIKED-500 & Pooled (580) & 72.59 & 21.29 & 46.86 & 59.48 & 497.56 & 497.56 & 1.00 \\
+ALIKED-1000 & Pooled (580) & 73.62 & 20.73 & 47.55 & 56.54 & 1000.00 & 1000.00 & 1.00 \\
+XFeat-1000 & Pooled (580) & 55.52 & 14.00 & 32.92 & 44.48 & 1000 & 1000 & 1.00 \\
+Best Fixed (Fold VAL) & Pooled (580) & 73.97 & 24.66 & 49.62 & 61.04 & 3155.39 & 3155.39 & 1.00 \\
+\hline
+\multicolumn{9}{l}{\textit{Level 2 Fixed-Preset Ablations}} \\
+SIFT + Level 2 & Pooled (580) & 70.34 & 22.81 & 47.17 & 58.93 & 1446.90 & 3803.65 & 2.24 \\
+ALIKED + Level 2 & Pooled (580) & 72.59 & 21.35 & 46.78 & 59.58 & 530.67 & 1094.10 & 1.06 \\
 \hline
 \multicolumn{9}{l}{\textit{Adaptive \& Upper Bound Methods}} \\
-Full AFM-RL v1 (Strict STOP) & Pooled (580) & 72.41 & 20.12 & 46.81 & 55.83 & 500 & 1215.38 & 1.00 \\
-AFM-RL v2 Cascade (Exploratory) & Pooled (580) & 76.21 & 21.68 & 49.61 & 58.74 & 1165.50 & 1548.30 & 1.41 \\
-Oracle Preset Selection* & Pooled (580) & 80.69 & 24.97 & 56.33 & 65.31 & 4000 & 4000 & 1.00 \\
+Full AFM-RL v1 (Strict STOP) & Pooled (580) & 72.41 & 21.54 & 46.79 & 59.57 & 573.64 & 1215.38 & 1.12 \\
+Proxy-Guided Cascade (Exploratory) & Pooled (580) & 76.21 & 21.68 & 49.61 & 58.74 & 680.17 & 920.69 & 1.25 \\
+Oracle Preset Selection* & Pooled (580) & 84.83 & 33.50 & 60.41 & 72.04 & 1104.69 & 2731.39 & 1.75 \\
 \hline
 \multicolumn{9}{l}{\textit{Primary Pre-Registered Comparisons (AFM-RL v1 vs. Baseline, 95\% Clustered Bootstrap CIs)}} \\
-P1 vs. Best Fixed VAL & Delta & \multicolumn{2}{l}{$-1.55\%\ [-5.34\%, +1.90\%]$} & \multicolumn{2}{l}{$-2.83\ [-5.67\%, -0.29\%]$} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
-P2 vs. ALIKED-500 & Delta & \multicolumn{2}{l}{$-0.17\%\ [-1.03\%, +0.52\%]$} & \multicolumn{2}{l}{$-0.08\ [-0.56\%, +0.38\%]$} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
-P3 vs. SIFT-2000 & Delta & \multicolumn{2}{l}{$-0.34\%\ [-4.48\%, +3.45\%]$} & \multicolumn{2}{l}{$-2.20\ [-5.25\%, +0.74\%]$} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
-P4 vs. SIFT-4000 & Delta & \multicolumn{2}{l}{$-0.52\%\ [-4.66\%, +3.28\%]$} & \multicolumn{2}{l}{$-4.32\ [-7.31\%, -1.54\%]$} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
-P5 vs. Oracle Preset* & Delta & \multicolumn{2}{l}{$-8.28\%\ [-11.72\%, -4.83\%]$} & \multicolumn{2}{l}{$-9.52\ [-12.21, -6.84]$} & \multicolumn{3}{l}{Significant Deficit ($p < 0.001$)} \\
+P1 vs. Best Fixed VAL & Delta & \multicolumn{2}{l}{-1.55\%\ [-5.34%, +1.90%]} & \multicolumn{2}{l}{-2.83\ [-5.67%, -0.29%]} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
+P2 vs. ALIKED-500 & Delta & \multicolumn{2}{l}{-0.17\%\ [-1.03%, +0.52%]} & \multicolumn{2}{l}{-0.08\ [-0.56%, +0.38%]} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
+P3 vs. SIFT-2000 & Delta & \multicolumn{2}{l}{-0.34\%\ [-4.48%, +3.45%]} & \multicolumn{2}{l}{-2.20\ [-5.25%, +0.74%]} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
+P4 vs. SIFT-4000 & Delta & \multicolumn{2}{l}{-0.52\%\ [-4.66%, +3.28%]} & \multicolumn{2}{l}{-4.32\ [-7.31%, -1.54%]} & \multicolumn{3}{l}{Succ: Indistinguishable; AUC: Lower} \\
+P5 vs. Oracle Preset* & Delta & \multicolumn{2}{l}{-12.41\%\ [-16.21\%, -8.97\%]} & \multicolumn{2}{l}{-13.63\ [-16.15, -11.38]} & \multicolumn{3}{l}{Significantly Lower (CI excludes 0)} \\
 \hline
 \end{tabular}
 \end{table*}

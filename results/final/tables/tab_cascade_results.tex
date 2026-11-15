@@ -1,21 +1,26 @@
-% Data Table T3: Cascade Results, Robustness & Component Studies
-% Source: results/final/all_results.csv (T3_Cascade_Results)
+% Data Table T4: Cascade Results, Robustness & Component Studies
+% Generated programmatically by results/final/regenerate_tables.py
 \begin{table*}[t]
 \centering
-\caption{Detailed evaluation of feature cascades on MegaDepth-1500: cross-validation fold selections, correspondence permutation sensitivity, and ablation controls. All cascades use unsupervised epipolar proxy $\hat{P}_{epi}$ for escalation decisions.}
+\caption{Detailed evaluation of feature cascades on MegaDepth-1500: cross-validation fold selections, reference-image cluster bootstrap comparisons (10,000 resamples), correspondence permutation sensitivity, and ablation controls. All cascades use unsupervised epipolar proxy $\hat{P}_{epi}$ for escalation decisions.}
 \label{tab:cascade_results}
 \small
 \begin{tabular}{lcccccc}
 \hline
-\textbf{Cascade / Control Setup} & \textbf{Protocol Status} & \textbf{Succ@10° (\%)} & \textbf{AUC@10°} & \textbf{Cum. KP} & \textbf{Stop Rate (\%)} & \textbf{Escalation (\%)} \\
+\textbf{Cascade / Control Setup} & \textbf{Protocol Status} & \textbf{Succ@10$^\circ$ (\%)} & \textbf{AUC@10$^\circ$} & \textbf{Cum. KP} & \textbf{Stop Rate (\%)} & \textbf{Escalation (\%)} \\
 \hline
-\multicolumn{7}{l}{\textit{Fold-Selected Cascades (Protocol v2 Amendment 1)}} \\
+\multicolumn{7}{l}{\textit{Fold-Selected Cascades (Frozen Protocol Evaluation)}} \\
 Fold 0: C4 ($\tau=0.40$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.58 & 1529.96 & 59.47 & 40.53 \\
 Fold 1: C4 ($\tau=0.45$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.49 & 1642.44 & 55.47 & 44.53 \\
 Fold 2: C4 ($\tau=0.40$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.58 & 1529.96 & 59.47 & 40.53 \\
 Fold 3: C4 ($\tau=0.40$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.58 & 1529.96 & 59.47 & 40.53 \\
 Fold 4: C2 ($\tau=0.40$, AL500 $\to$ AL1k $\to$ SI4k) & Pre-registered & 82.40 & 60.04 & 1909.65 & 59.47 & 40.53 \\
-Pooled Fold-Selected Ensemble & Pre-registered & 79.57 & 58.07 & 1608.40 & 58.67 & 41.33 \\
+Pooled Fold-Selected Ensemble & Pre-registered & 79.57 & 58.05 & 1628.40 & 58.67 & 41.33 \\
+\hline
+\multicolumn{7}{l}{\textit{Reference-Image Clustered Bootstrap vs. Baselines (10,000 Resamples)}} \\
+vs. ALIKED-500 & Delta & \multicolumn{2}{l}{+3.44\%\ [+2.09\%, +4.81\%]} & \multicolumn{3}{l}{$\Delta\text{AUC}@10^\circ = +2.79$ [+1.69, +3.90], $\Delta\text{KP} = +1130.9$} \\
+vs. ALIKED-1000 & Delta & \multicolumn{2}{l}{+1.91\%\ [+0.04\%, +3.74\%]} & \multicolumn{3}{l}{$\Delta\text{AUC}@10^\circ = +2.57$ [+1.16, +3.95], $\Delta\text{KP} = +651.4$} \\
+vs. SIFT-4000 & Delta & \multicolumn{2}{l}{+2.37\%\ [+0.04\%, +4.70\%]} & \multicolumn{3}{l}{$\Delta\text{AUC}@10^\circ = +3.24$ [+1.24, +5.27], $\Delta\text{KP} = -2192.7$} \\
 \hline
 \multicolumn{7}{l}{\textit{Post-Hoc Cascade C6 ($\tau=0.40$, ALIKED-500 $\to$ SIFT-4000) Permutation Robustness}} \\
 Original Match Ordering & Post-hoc & 82.13 & 59.94 & 2013.49 & 59.47 & 40.53 \\

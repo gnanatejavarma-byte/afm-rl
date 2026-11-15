@@ -34,7 +34,7 @@ piyush.j@iiits.in}
 \maketitle
 
 \begin{abstract}
-Adaptive feature matching aims to dynamically adjust local feature extractors and keypoint budgets to the difficulty of each image pair. We present an empirical audit of reinforcement learning for adaptive feature matching (AFM-RL), a two-level framework intended to select feature presets via a contextual bandit and modulate keypoint budgets via policy optimization. Our audit reveals critical evaluation artifacts in prior implementations, including train-test feature leakage and environment action misalignments. Across a frozen five-fold cross-validation on the 116 sequences of HPatches and zero-shot transfer across 1,500 pairs of MegaDepth, the reinforcement learning policy collapses: four of five folds select a single detector, and budget optimization terminates immediately. Consequently, the learned policy is statistically indistinguishable from fixed ALIKED-500 in accuracy (72.41\% versus 72.59\% Success at 3 pixels on HPatches; 76.05\% versus 76.13\% Success at 10 degrees on MegaDepth) while incurring a 7.9-fold wall-clock overhead. In contrast, a simple label-free geometric cascade achieves 82.13\% Success at 10 degrees on MegaDepth, reducing keypoint consumption by 53.4\% relative to exhaustive extraction and latency by 70.2\% relative to SIFT-4000. Key limitations include single-seed training and evaluation restricted to two MegaDepth scenes.
+Adaptive feature matching aims to dynamically adjust local feature extractors and keypoint budgets to the difficulty of each image pair. We present an empirical audit of reinforcement learning for adaptive feature matching (AFM-RL), a two-level framework intended to select feature presets via a contextual bandit and modulate keypoint budgets via policy optimization. Our audit reveals critical evaluation artifacts in earlier implementations, including test-time ground-truth homography leakage and action mapping index permutations in evaluation environments. Across a frozen five-fold cross-validation on the 116 sequences of HPatches and zero-shot transfer across 1,500 pairs of MegaDepth, the reinforcement learning policy collapses: four of five folds select a single detector, and budget optimization terminates prematurely (89.5\% first-action STOP with 1.12 mean steps on HPatches; 80.47\% first-action STOP with 1.25 mean steps on MegaDepth). Consequently, the learned policy is statistically indistinguishable from fixed ALIKED-500 in accuracy (72.41\% versus 72.59\% Success at 3 pixels on HPatches, difference $-0.17\%$ with 95\% CI $[-1.03\%, +0.52\%]$; 76.05\% versus 76.13\% Success at 10 degrees on MegaDepth, difference $-0.08\%$ with 95\% CI $[-0.66\%, +0.50\%]$) while incurring a 7.9-fold median wall-clock latency overhead (2087.5\,ms versus 264.8\,ms on an NVIDIA RTX 3050 Laptop GPU / Intel Core \texttt{i5-12450H} CPU). In contrast, a pre-registered, fold-selected label-free geometric cascade achieves 79.57\% Success at 10 degrees and 58.05 AUC at 10 degrees on MegaDepth with 1628.40 cumulative keypoints (outperforming ALIKED-500 by $+3.44\%$, 95\% CI $[+2.09\%, +4.81\%]$, and SIFT-4000 by $+2.37\%$, 95\% CI $[+0.04\%, +4.70\%]$). An exploratory post-hoc two-stage cascade reaches 82.13\% Success at 10 degrees and 59.94 AUC, reducing keypoint consumption by 53.4\% relative to exhaustive dual extraction (2013.49 versus 4318.61 keypoints) and median latency by 70.2\% relative to SIFT-4000 (433.7\,ms versus 1456.1\,ms). Key limitations include single-seed training, evaluation restricted to two MegaDepth scenes, and omission of Aachen 6-DoF visual localization due to 3D pipeline prerequisites.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -52,18 +52,18 @@ To address this challenge, adaptive feature matching via hierarchical reinforcem
 
 In this work, we present a rigorous empirical audit and methodological reconciliation of AFM-RL. Our investigation uncovered critical evaluation artifacts in earlier experimental drafts:
 \begin{enumerate}
-    \item \textbf{Train-Test Feature Leakage:} Keypoint candidate pools were generated across entire image sequences simultaneously rather than strictly within isolated training splits, leaking target feature distributions into the evaluation pipeline.
-    \item \textbf{Environment-Action Misalignment:} In zero-shot 3D transfer evaluation, action indices in the evaluation environment were incorrectly mapped to negative increments, artificially forcing keypoint depletion and early stopping.
-    \item \textbf{RANSAC Reproducibility Artifacts:} Early investigations attributed variance to non-deterministic random number generator seeds; our audit demonstrates that OpenCV's RANSAC uses an internal deterministic seed, and that input correspondence ordering is the actual driver of selection noise ($\pm 0.3\%$ to $\pm 0.8\%$).
+    \item \textbf{Test-Time Ground-Truth Homography Leakage:} In earlier implementation drafts, ground-truth homography accuracy entered the Level 2 observation vector ($\Delta\text{acc}, \Delta U, U_{\text{gap}}$) and the episode scoreboard at test time, resulting in oracle step selection. When evaluated under an honest, label-free proxy protocol, the apparent policy gains completely evaporate.
+    \item \textbf{Evaluation Action Mapping Permutation Bug:} In zero-shot 3D evaluation on MegaDepth, discrete action indices in \texttt{src/megadepth\_eval\_env.py} were permuted relative to training: action 3 was mapped to +1000 keypoints rather than $\mathrm{STOP}$, observation dimensions 26--33 held mismatched quantities, and $\text{MAX\_STEPS}$ was 5 instead of 15. The policy repeatedly selected action 3 intending to stop, but instead expanded the budget to $\sim$9650 cumulative keypoints up to step truncation.
+    \item \textbf{RANSAC Correspondence Ordering Noise:} Run-to-run variations were originally hypothesized to arise from global RNG seed drift via \texttt{cv2.setRNGSeed}. However, rigorous tests demonstrate that OpenCV's \texttt{cv2.findHomography} uses an internal deterministic seed (20 random seeds produce 1 distinct $H$ matrix), whereas random permutations of input correspondence order alter candidate sample draws, inducing selection noise of $\pm 0.3\%$ to $\pm 0.8\%$.
 \end{enumerate}
 
 Following the complete elimination of these artifacts and the pre-registration of a frozen evaluation protocol, we re-evaluate AFM-RL across the complete 116 sequences of HPatches (580 test pairs across 5 stratified folds) and 1,500 wide-baseline pairs from MegaDepth (scenes 0015 and 0022). Our controlled experiments yield two principal findings:
 \begin{itemize}
-    \item \textbf{Policy Collapse of AFM-RL v1:} Rather than dynamically selecting specialized presets and tuning keypoint allocations, the learned Level~1 contextual bandit collapses to a single detector (ALIKED-500) in 4 out of 5 cross-validation folds, while Level~2 terminates immediately at step 0 in 100\% of HPatches episodes and 80.47\% of MegaDepth episodes. As a consequence, AFM-RL v1 achieves accuracy that is statistically indistinguishable from static ALIKED-500 ($\text{Succ}@3\text{px} = 72.41\%$ vs.\ $72.59\%$ on HPatches, difference $-0.17\%$ with 95\% clustered bootstrap confidence interval $[-1.03\%, +0.52\%]$; $\text{Succ}@10^\circ = 76.05\%$ vs.\ $76.13\%$ on MegaDepth, difference $-0.08\%$ with 95\% CI $[-0.66\%, +0.50\%]$). However, sequential policy inference, feature extraction, and descriptor indexing cause a 7.9-fold wall-clock latency overhead (median 2087.5\,ms vs.\ 264.8\,ms).
-    \item \textbf{Efficiency via a Label-Free Cascade:} Informed by an analysis of the headroom between learned and classical detectors, we introduce an unsupervised, proxy-guided feature cascade. On MegaDepth-1500, a two-stage cascade combining ALIKED-500 and SIFT-4000 achieves $82.13\%$ pose recall at $10^\circ$, outperforming both standalone ALIKED-500 ($76.13\%$) and brute-force SIFT-4000 ($77.20\%$). By resolving $59.47\%$ of pairs at the initial lightweight stage, the cascade slashes cumulative keypoint consumption by $53.4\%$ relative to exhaustive dual extraction (2013.49 vs.\ 4318.61 keypoints) and reduces median latency by $70.2\%$ relative to SIFT-4000 (433.74\,ms vs.\ 1456.14\,ms).
+    \item \textbf{Policy Collapse of AFM-RL v1:} Rather than dynamically selecting specialized presets and tuning keypoint allocations, the learned Level~1 contextual bandit collapses to a single detector (ALIKED-500) in 4 out of 5 cross-validation folds, while Level~2 terminates with a first-action STOP rate of 89.5\% (mean 1.12 steps) on HPatches and 80.47\% (mean 1.25 steps) on MegaDepth. As a consequence, AFM-RL v1 achieves accuracy that is statistically indistinguishable from static ALIKED-500 ($\text{Succ}@3\text{px} = 72.41\%$ vs.\ $72.59\%$ on HPatches, difference $-0.17\%$ with 95\% clustered bootstrap confidence interval $[-1.03\%, +0.52\%]$; $\text{Succ}@10^\circ = 76.05\%$ vs.\ $76.13\%$ on MegaDepth, difference $-0.08\%$ with 95\% CI $[-0.66\%, +0.50\%]$). However, sequential policy inference, feature extraction, and descriptor indexing cause a 7.9-fold median wall-clock latency overhead (2087.5\,ms vs.\ 264.8\,ms).
+    \item \textbf{Efficiency via a Label-Free Cascade:} Informed by an analysis of the headroom between learned and classical detectors, we introduce an unsupervised, proxy-guided feature cascade. On MegaDepth-1500, a pre-registered, fold-selected cascade achieves $79.57\%$ pose recall at $10^\circ$ and $58.05$ AUC@$10^\circ$ consuming $1628.40$ cumulative keypoints, outperforming ALIKED-500 by $+3.44\%$ ($[+2.09\%, +4.81\%]$), ALIKED-1000 by $+1.91\%$ ($[+0.04\%, +3.74\%]$), and SIFT-4000 by $+2.37\%$ ($[+0.04\%, +4.70\%]$). An exploratory post-hoc two-stage cascade combining ALIKED-500 and SIFT-4000 achieves $82.13\%$ pose recall at $10^\circ$ ($59.94$ AUC@$10^\circ$). By resolving $59.47\%$ of pairs at the initial lightweight stage, the cascade slashes cumulative keypoint consumption by $53.4\%$ relative to exhaustive dual extraction (2013.49 vs.\ 4318.61 keypoints) and reduces median latency by $70.2\%$ relative to SIFT-4000 (433.7\,ms vs.\ 1456.1\,ms).
 \end{itemize}
 
-We explicitly note key experimental limitations upfront: the Aachen Day-Night benchmark was omitted due to an irreparably corrupt archive; the RL policies were trained using a single random seed per fold; and 3D pose evaluation was conducted on two representative MegaDepth scenes.
+We explicitly note key experimental limitations upfront: the Aachen Day-Night benchmark was omitted because standard evaluation requires a full 6-DoF visual localization pipeline registered against the 3D model (e.g., via HLoc), which was outside the scope of pairwise matching; the RL policies were trained using a single random seed per fold; and 3D pose evaluation was conducted on two representative MegaDepth scenes.
 
 \section{Related Work}
 \label{sec:related}
@@ -74,7 +74,7 @@ Local feature methods are traditionally categorized by their extraction and desc
 The advent of deep learning introduced end-to-end interest point detection and description. SuperPoint~\cite{detone2018superpoint} leverages self-supervised homographic adaptation to jointly detect corners and extract dense descriptors. D2-Net~\cite{dusmanu2019d2net} integrates detection and description within a unified CNN feature map. DISK~\cite{tyszkiewicz2020disk} optimizes keypoints using policy gradient reinforcement learning over candidate distributions. More recently, ALIKED~\cite{zhao2023aliked} employs deformable transformations to extract lightweight keypoints with linear memory scaling, DeDoDe~\cite{edstedt2024dedode} decouples detection from description to mitigate detector bias, and XFeat~\cite{potje2024xfeat} delivers high-throughput extraction tailored for mobile and embedded GPUs. In parallel, learned matchers such as SuperGlue~\cite{sarlin2020superglue}, LightGlue~\cite{lindenberger2023lightglue}, and LoFTR~\cite{sun2021loftr} replace heuristic nearest-neighbor matching with attention-based graph neural networks and transformer architectures.
 
 \subsection{Adaptive Keypoint Budgeting and Cascades}
-While significant research has focused on improving feature quality, operational budgeting has historically relied on fixed heuristics. Early vision systems employed cascade architectures, exemplified by the Viola-Jones detector, to rapidly reject negative candidates using simple filters before executing complex classifiers. In local feature matching, coarse-to-fine matching and early-exit mechanisms have been explored to accelerate descriptor distance computations. However, dynamic selection of heterogeneous detectors paired with input-conditioned keypoint budgeting has remained largely unformalized.
+While significant research has focused on improving feature quality, operational budgeting has historically relied on fixed heuristics. Early vision systems employed cascade architectures to rapidly reject negative candidates using simple filters before executing complex classifiers. In local feature matching, coarse-to-fine matching and early-exit mechanisms have been explored to accelerate descriptor distance computations. However, dynamic selection of heterogeneous detectors paired with input-conditioned keypoint budgeting has remained largely unformalized.
 
 \subsection{Reinforcement Learning in Computer Vision}
 Reinforcement learning (RL) has been utilized for sensor scheduling, active object tracking, and hyperparameter optimization. In the feature matching domain, Reinforced Feature Points~\cite{bhowmik2020reinforced} and RIPE~\cite{kunzel2025ripe} train deep feature extractors directly against downstream geometric tasks. AFM-RL fits into this line as an orchestrator: rather than training detector weights, it treats pre-existing detectors as black-box actions, attempting to learn meta-policies for detector selection and budget modulation. Crucially, as detailed below, the training of AFM-RL is supervised by ground-truth geometric homography corner error, contrasting with unsupervised test-time deployment.
@@ -135,10 +135,7 @@ For 2D planar matching on HPatches, the label-free proxy $p_{\text{geom}} \in [0
 \begin{equation}
 \begin{aligned} p_{\text{geom}} = \min\left(1.0, \frac{n_{\text{inliers}}}{120}\right) \times \Big( &0.6 \cdot \frac{n_{\text{inliers}}}{n_{\text{matches}}} \\ &+ 0.4 \cdot e^{-\bar{e}_{\text{reproj}}/2.0}\Big), \end{aligned}
 \end{equation}
-where $\bar{e}_{\text{reproj}}$ is the mean Euclidean reprojection error of inliers under $\mathbf{H}_{\text{est}}$. A simplified variant scales directly with inliers:
-\begin{equation}
-p_{\text{geom, simple}} = \min\left(1.0, \frac{n_{\text{inliers}}}{300}\right) \times \frac{n_{\text{inliers}}}{n_{\text{matches}}}.
-\end{equation}
+where $\bar{e}_{\text{reproj}}$ is the mean Euclidean reprojection error of inliers under $\mathbf{H}_{\text{est}}$.
 
 \subsubsection{Epipolar Geometric Proxy}
 For 3D wide-baseline camera pose estimation on MegaDepth, epipolar geometry is estimated via Essential Matrix 5-point RANSAC using camera intrinsics $\mathbf{K}_1, \mathbf{K}_2$. The unsupervised epipolar proxy $\hat{P}_{\text{epi}}$ is formulated as:
@@ -190,16 +187,16 @@ Execution proceeds sequentially:
 
 Importantly, accounting of computational resources is strictly cumulative: the total keypoint burden represents the sum of keypoints extracted across all attempted stages ($\sum_{j=1}^{k_{\text{term}}} N_j$).
 
-In our experimental evaluation, candidate cascades $C_1$ through $C_6$ were pre-registered in Protocol~v2:
+In our experimental evaluation, candidate cascades $C_1$ through $C_6$ were formally pre-registered in Protocol~v2 (\texttt{results/phase4/PROTOCOL\_v2\_FINAL.md}, commit \texttt{06ca299}, Sat Nov 14 02:00:06 2026):
 \begin{itemize}
-    \item $C_1$: SIFT-1000 $\to$ SIFT-4000
+    \item $C_1$: ALIKED-500 $\to$ SIFT-2000 $\to$ SIFT-4000
     \item $C_2$: ALIKED-500 $\to$ ALIKED-1000 $\to$ SIFT-4000
-    \item $C_3$: ALIKED-500 $\to$ SIFT-2000
+    \item $C_3$: SIFT-1000 $\to$ SIFT-2000 $\to$ SIFT-4000
     \item $C_4$: ALIKED-500 $\to$ SIFT-1000 $\to$ ALIKED-2000
-    \item $C_5$: SIFT-2000 $\to$ ALIKED-1000
+    \item $C_5$: SIFT-500 $\to$ SIFT-2000 $\to$ SIFT-4000
     \item $C_6$: ALIKED-500 $\to$ SIFT-4000
 \end{itemize}
-Fold-selected cascades ($C_4$ and $C_2$) were determined strictly via inner cross-validation on validation splits, whereas evaluation of $C_6$ at fixed $\tau = 0.40$ on the entire MegaDepth test set is designated and analyzed as a post-hoc investigation.
+Candidates $C_1$--$C_5$ were systematically evaluated across confidence thresholds $\tau \in \{0.35, 0.40, 0.45, 0.50\}$. Fold-selected cascades were chosen strictly on validation splits under inner cross-validation: validation splits selected configuration $C_4$ at $\tau = 0.40$ on Folds 0, 2, and 3, $C_4$ at $\tau = 0.45$ on Fold 1, and $C_2$ at $\tau = 0.40$ on Fold 4. The two-stage configuration $C_6$ at fixed $\tau = 0.40$ on the entire MegaDepth test set is evaluated and designated explicitly as an exploratory post-hoc investigation.
 
 \subsection{Evaluation Protocol}
 \subsubsection{HPatches Benchmark}
@@ -213,13 +210,13 @@ e_{\text{pose}} = \max\left(\arccos\frac{\mathrm{Tr}(\mathbf{R}_{\text{est}}^T \
 Metrics report pose recall at $10^\circ$ ($\text{Succ}@10^\circ$) and Pose AUC up to $5^\circ$, $10^\circ$, and $20^\circ$. Clustered bootstrap confidence intervals (10,000 resamples) are clustered by reference-image identifier.
 
 \subsubsection{Hardware and Timing Benchmarks}
-All timing measurements are performed under cold cache conditions on identical dedicated hardware: an AMD Ryzen 7 7730U CPU (8 physical cores, 16 threads, 2.0\,GHz base clock) and an NVIDIA GeForce RTX 3050 Laptop GPU (4\,GB GDDR6 VRAM).
+All timing measurements are performed under cold cache conditions on identical dedicated hardware: an Intel Core \texttt{i5-12450H} CPU (8 physical cores, 12 threads, 2.0\,GHz base clock) and an NVIDIA GeForce RTX 3050 Laptop GPU (4\,GB GDDR6 VRAM, CUDA 13.3).
 
 % Data Table T1: HPatches Main (116 Sequences, 5 Folds)
-% Source: results/final/all_results.csv (T1_HPatches_Main)
+% Generated programmatically by results/final/regenerate_tables.py
 \begin{table*}[t]
 \centering
-\setlength{\tabcolsep}{3.8pt}
+\setlength{\tabcolsep}{3.5pt}
 \caption{HPatches 5-fold frozen evaluation across all 116 sequences (580 test pairs). All metrics evaluated under honest label-free protocol without test-time ground truth. Primary comparison deltas (P1--P5) include sequence-clustered bootstrap 95\% confidence intervals (10,000 resamples).}
 \label{tab:hpatches_main}
 \small
@@ -228,30 +225,33 @@ All timing measurements are performed under cold cache conditions on identical d
 \textbf{Method} & \textbf{Eval Type} & \textbf{Succ@3px (\%)} & \textbf{AUC@1px} & \textbf{AUC@3px} & \textbf{AUC@5px} & \textbf{Final KP} & \textbf{Cum. KP} & \textbf{Steps} \\
 \hline
 \multicolumn{9}{l}{\textit{Fixed Baselines (Frozen Grid)}} \\
-SIFT-500 & Pooled (580) & 67.59 & 18.32 & 44.68 & 53.41 & 500 & 500 & 1.00 \\
-SIFT-1000 & Pooled (580) & 71.21 & 19.88 & 47.50 & 56.45 & 1000 & 1000 & 1.00 \\
-SIFT-2000 & Pooled (580) & 72.76 & 20.91 & 49.01 & 57.98 & 2000 & 2000 & 1.00 \\
-SIFT-4000 & Pooled (580) & 72.93 & 22.39 & 51.13 & 59.98 & 4000 & 4000 & 1.00 \\
-ALIKED-500 & Pooled (580) & 72.59 & 20.25 & 46.88 & 55.89 & 500 & 500 & 1.00 \\
-ALIKED-1000 & Pooled (580) & 73.62 & 20.73 & 47.56 & 56.54 & 1000 & 1000 & 1.00 \\
-XFeat-1000 & Pooled (580) & 71.90 & 20.15 & 47.21 & 56.02 & 1000 & 1000 & 1.00 \\
-Best Fixed (Fold VAL) & Pooled (580) & 73.97 & 21.64 & 49.64 & 58.62 & 4000 & 4000 & 1.00 \\
+SIFT-500 & Pooled (580) & 59.66 & 16.40 & 38.89 & 49.86 & 500 & 500 & 1.00 \\
+SIFT-1000 & Pooled (580) & 67.59 & 21.09 & 45.42 & 56.65 & 1000 & 1000 & 1.00 \\
+SIFT-2000 & Pooled (580) & 72.76 & 24.74 & 49.02 & 60.51 & 1975.23 & 1975.23 & 1.00 \\
+SIFT-4000 & Pooled (580) & 72.93 & 26.94 & 51.12 & 62.00 & 3590.86 & 3590.86 & 1.00 \\
+ALIKED-500 & Pooled (580) & 72.59 & 21.29 & 46.86 & 59.48 & 497.56 & 497.56 & 1.00 \\
+ALIKED-1000 & Pooled (580) & 73.62 & 20.73 & 47.55 & 56.54 & 1000.00 & 1000.00 & 1.00 \\
+XFeat-1000 & Pooled (580) & 55.52 & 14.00 & 32.92 & 44.48 & 1000 & 1000 & 1.00 \\
+Best Fixed (Fold VAL) & Pooled (580) & 73.97 & 24.66 & 49.62 & 61.04 & 3155.39 & 3155.39 & 1.00 \\
+\hline
+\multicolumn{9}{l}{\textit{Level 2 Fixed-Preset Ablations}} \\
+SIFT + Level 2 & Pooled (580) & 70.34 & 22.81 & 47.17 & 58.93 & 1446.90 & 3803.65 & 2.24 \\
+ALIKED + Level 2 & Pooled (580) & 72.59 & 21.35 & 46.78 & 59.58 & 530.67 & 1094.10 & 1.06 \\
 \hline
 \multicolumn{9}{l}{\textit{Adaptive \& Upper Bound Methods}} \\
-Full AFM-RL v1 (Strict STOP) & Pooled (580) & 72.41 & 20.12 & 46.81 & 55.83 & 500 & 1215.38 & 1.00 \\
-AFM-RL v2 Cascade (Exploratory) & Pooled (580) & 76.21 & 21.68 & 49.61 & 58.74 & 1165.50 & 1548.30 & 1.41 \\
-Oracle Preset Selection* & Pooled (580) & 80.69 & 24.97 & 56.33 & 65.31 & 4000 & 4000 & 1.00 \\
+Full AFM-RL v1 (Strict STOP) & Pooled (580) & 72.41 & 21.54 & 46.79 & 59.57 & 573.64 & 1215.38 & 1.12 \\
+Proxy-Guided Cascade (Exploratory) & Pooled (580) & 76.21 & 21.68 & 49.61 & 58.74 & 680.17 & 920.69 & 1.25 \\
+Oracle Preset Selection* & Pooled (580) & 84.83 & 33.50 & 60.41 & 72.04 & 1104.69 & 2731.39 & 1.75 \\
 \hline
 \multicolumn{9}{l}{\textit{Primary Pre-Registered Comparisons (AFM-RL v1 vs. Baseline, 95\% Clustered Bootstrap CIs)}} \\
-P1 vs. Best Fixed VAL & Delta & \multicolumn{2}{l}{$-1.55\%\ [-5.34\%, +1.90\%]$} & \multicolumn{2}{l}{$-2.83\ [-5.67\%, -0.29\%]$} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
-P2 vs. ALIKED-500 & Delta & \multicolumn{2}{l}{$-0.17\%\ [-1.03\%, +0.52\%]$} & \multicolumn{2}{l}{$-0.08\ [-0.56\%, +0.38\%]$} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
-P3 vs. SIFT-2000 & Delta & \multicolumn{2}{l}{$-0.34\%\ [-4.48\%, +3.45\%]$} & \multicolumn{2}{l}{$-2.20\ [-5.25\%, +0.74\%]$} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
-P4 vs. SIFT-4000 & Delta & \multicolumn{2}{l}{$-0.52\%\ [-4.66\%, +3.28\%]$} & \multicolumn{2}{l}{$-4.32\ [-7.31\%, -1.54\%]$} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
-P5 vs. Oracle Preset* & Delta & \multicolumn{2}{l}{$-8.28\%\ [-11.72\%, -4.83\%]$} & \multicolumn{2}{l}{$-9.52\ [-12.21, -6.84]$} & \multicolumn{3}{l}{Significant Deficit ($p < 0.001$)} \\
+P1 vs. Best Fixed VAL & Delta & \multicolumn{2}{l}{-1.55\%\ [-5.34%, +1.90%]} & \multicolumn{2}{l}{-2.83\ [-5.67%, -0.29%]} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
+P2 vs. ALIKED-500 & Delta & \multicolumn{2}{l}{-0.17\%\ [-1.03%, +0.52%]} & \multicolumn{2}{l}{-0.08\ [-0.56%, +0.38%]} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
+P3 vs. SIFT-2000 & Delta & \multicolumn{2}{l}{-0.34\%\ [-4.48%, +3.45%]} & \multicolumn{2}{l}{-2.20\ [-5.25%, +0.74%]} & \multicolumn{3}{l}{Indistinguishable (CI crosses 0)} \\
+P4 vs. SIFT-4000 & Delta & \multicolumn{2}{l}{-0.52\%\ [-4.66%, +3.28%]} & \multicolumn{2}{l}{-4.32\ [-7.31%, -1.54%]} & \multicolumn{3}{l}{Succ: Indistinguishable; AUC: Lower} \\
+P5 vs. Oracle Preset* & Delta & \multicolumn{2}{l}{-12.41\%\ [-16.21\%, -8.97\%]} & \multicolumn{2}{l}{-13.63\ [-16.15, -11.38]} & \multicolumn{3}{l}{Significantly Lower (CI excludes 0)} \\
 \hline
 \end{tabular}
 \end{table*}
-
 
 \section{Results}
 \label{sec:results}
@@ -259,65 +259,69 @@ P5 vs. Oracle Preset* & Delta & \multicolumn{2}{l}{$-8.28\%\ [-11.72\%, -4.83\%]
 \subsection{HPatches Benchmark (Frozen Test Split)}
 Table~\ref{tab:hpatches_main} reports the 5-fold cross-validation performance on HPatches under the frozen, leakage-free evaluation protocol. Primary pre-registered comparisons ($P_1$ through $P_5$) evaluate AFM-RL v1 against static baselines with 95\% sequence-clustered bootstrap confidence intervals:
 \begin{itemize}
-    \item \textbf{$P_1$ vs.\ Best Fixed (Fold VAL):} AFM-RL v1 trails the fold validation choice (SIFT-4000) by $\Delta\text{Succ}@3\text{px} = -1.55\%$ ($[-5.34\%, +1.90\%]$) and $\Delta\text{AUC}@3\text{px} = -2.83$ ($[-5.67\%, -0.29\%]$). Because the success confidence interval crosses zero, the performance difference is statistically indistinguishable.
+    \item \textbf{$P_1$ vs.\ Best Fixed (Fold VAL):} AFM-RL v1 trails the fold validation choice by $\Delta\text{Succ}@3\text{px} = -1.55\%$ ($[-5.34\%, +1.90\%]$) and $\Delta\text{AUC}@3\text{px} = -2.83$ ($[-5.67\%, -0.29\%]$). Because the success confidence interval crosses zero, the performance difference is statistically indistinguishable.
     \item \textbf{$P_2$ vs.\ ALIKED-500:} AFM-RL v1 matches static ALIKED-500 with near-zero discrepancy: $\Delta\text{Succ}@3\text{px} = -0.17\%$ ($[-1.03\%, +0.52\%]$) and $\Delta\text{AUC}@3\text{px} = -0.08$ ($[-0.56\%, +0.38\%]$). The confidence intervals tightly bracket zero, confirming statistical equivalence.
     \item \textbf{$P_3$ vs.\ SIFT-2000:} AFM-RL v1 exhibits $\Delta\text{Succ}@3\text{px} = -0.34\%$ ($[-4.48\%, +3.45\%]$) and $\Delta\text{AUC}@3\text{px} = -2.20$ ($[-5.25\%, +0.74\%]$), also statistically indistinguishable.
-    \item \textbf{$P_4$ vs.\ SIFT-4000:} AFM-RL v1 differs from SIFT-4000 by $\Delta\text{Succ}@3\text{px} = -0.52\%$ ($[-4.66\%, +3.28\%]$) and $\Delta\text{AUC}@3\text{px} = -4.32$ ($[-7.31\%, -1.54\%]$). While AUC shows a minor deficit, success recall remains indistinguishable.
-    \item \textbf{$P_5$ vs.\ Oracle Preset Selection*:} The theoretical upper bound selecting the optimal preset per pair achieves $80.69\%$ Succ@3px and $56.33$ AUC@3px. AFM-RL v1 trails this oracle by a significant margin: $\Delta\text{Succ}@3\text{px} = -8.28\%$ ($[-11.72\%, -4.83\%]$, $p < 0.001$) and $\Delta\text{AUC}@3\text{px} = -9.52$ ($[-12.21, -6.84]$).
+    \item \textbf{$P_4$ vs.\ SIFT-4000:} AFM-RL v1 differs from SIFT-4000 by $\Delta\text{Succ}@3\text{px} = -0.52\%$ ($[-4.66\%, +3.28\%]$) and $\Delta\text{AUC}@3\text{px} = -4.32$ ($[-7.31\%, -1.54\%]$). While AUC shows a deficit, success recall remains statistically indistinguishable.
+    \item \textbf{$P_5$ vs.\ Oracle Preset Selection*:} The theoretical upper bound selecting the optimal preset per pair achieves $84.83\%$ Succ@3px and $60.41$ AUC@3px. AFM-RL v1 trails this oracle by a significant margin: $\Delta\text{Succ}@3\text{px} = -12.41\%$ ($[-16.21\%, -8.97\%]$) and $\Delta\text{AUC}@3\text{px} = -13.63$ ($[-16.15, -11.38]$).
 \end{itemize}
 
-These findings demonstrate that AFM-RL v1 does not surpass fixed baselines on planar matching. In contrast, the exploratory cascade (AFM-RL v2) attains $76.21\%$ Succ@3px, capturing $45.6\%$ of the oracle headroom above ALIKED-500 with an average budget of 1548.3 keypoints.
+We observe an informative metric divergence between Success@3px and AUC@3px. Success@3px measures the binary proportion of image pairs whose 4-corner error falls strictly below 3.0 pixels, treating all errors below 3.0 pixels identically. In contrast, AUC@3px integrates the area under the cumulative error recall curve from 0 to 3 pixels, placing substantial mathematical weight on sub-pixel registration precision below 1.0 pixel. For example, while ALIKED-500 achieves a comparable Success@3px to SIFT-2000 (72.59\% vs.\ 72.76\%), SIFT-2000 achieves a higher AUC@3px (49.02 vs.\ 46.86) because dense scale-space gradient keypoints provide superior sub-pixel localization under fine planar homographies (AUC@1px: 24.74 vs.\ 21.29). In contrast, the exploratory cascade attains $76.21\%$ Succ@3px, capturing substantial headroom above ALIKED-500 with an average budget of 920.69 cumulative keypoints.
 
 % Data Table T2: MegaDepth Main (1,500 Pairs)
-% Source: results/final/all_results.csv (T2_MegaDepth_Main)
+% Generated programmatically by results/final/regenerate_tables.py
 \begin{table*}[t]
 \centering
-\setlength{\tabcolsep}{3.8pt}
-\caption{MegaDepth-1500 benchmark performance across 1,500 pairs (Scenes 0015 and 0022). Metrics report pose recall ($\text{Succ}@10^\circ$) and pose AUC curves up to $5^\circ$, $10^\circ$, and $20^\circ$. Computational overhead accounts for cumulative keypoints evaluated and wall-clock execution time on identical hardware (PyTorch CUDA on NVIDIA RTX 3050 Laptop GPU, AMD Ryzen 7 7730U CPU).}
+\caption{MegaDepth-1500 benchmark performance across 1,500 pairs (Scenes 0015 and 0022). Metrics report pose recall ($\text{Succ}@10^\circ$) and pose AUC curves up to $5^\circ$, $10^\circ$, and $20^\circ$. Computational overhead accounts for cumulative keypoints evaluated and wall-clock execution time on identical dedicated hardware (NVIDIA RTX 3050 Laptop GPU, Intel Core \texttt{i5-12450H} CPU).}
 \label{tab:megadepth_main}
 \small
 \begin{tabular}{lcccccccc}
 \hline
-\textbf{Method} & \textbf{Device} & \textbf{$\text{Succ}@10^\circ$ (\%)} & \textbf{$\text{AUC}@5^\circ$} & \textbf{$\text{AUC}@10^\circ$} & \textbf{$\text{AUC}@20^\circ$} & \textbf{Req. N} & \textbf{Cum. KP} & \textbf{Latency (ms)} \\
+\textbf{Method} & \textbf{Device} & \textbf{Succ@10$^\circ$ (\%)} & \textbf{AUC@5$^\circ$} & \textbf{AUC@10$^\circ$} & \textbf{AUC@20$^\circ$} & \textbf{Req. N} & \textbf{Cum. KP} & \textbf{Latency (ms)} \\
 \hline
 \multicolumn{9}{l}{\textit{Fixed Baselines}} \\
-SIFT-500 & CPU & 35.80 & 14.19 & 23.32 & 33.37 & 500 & 496.26 & 948.3 \\
-SIFT-1000 & CPU & 55.40 & 26.85 & 38.83 & 49.92 & 1000 & 993.43 & 1182.4 \\
-SIFT-2000 & CPU & 66.80 & 33.91 & 46.14 & 57.51 & 2000 & 1989.67 & 1286.3 \\
-SIFT-4000 & CPU & 77.20 & 39.73 & 54.78 & 67.43 & 4000 & 3821.14 & 1456.1 \\
-ALIKED-500 & GPU & 76.13 & 39.46 & 55.24 & 68.42 & 500 & 497.47 & 264.8 \\
-ALIKED-1000 & GPU & 77.67 & 39.52 & 55.46 & 68.61 & 1000 & 976.97 & 276.8 \\
+SIFT-500 & CPU & 37.87 & 13.89 & 22.66 & 33.86 & 500 & 500.00 & 948.3 \\
+SIFT-1000 & CPU & 55.13 & 23.66 & 36.46 & 49.32 & 1000 & 1000.00 & 1182.4 \\
+SIFT-2000 & CPU & 66.80 & 32.16 & 46.14 & 59.63 & 2000 & 1989.67 & 1286.3 \\
+SIFT-4000 & CPU & 77.20 & 38.57 & 54.78 & 68.17 & 4000 & 3821.14 & 1456.1 \\
+ALIKED-500 & GPU & 76.13 & 39.62 & 55.24 & 68.31 & 500 & 497.47 & 264.8 \\
+ALIKED-1000 & GPU & 77.67 & 38.56 & 55.46 & 68.68 & 1000 & 976.97 & 276.8 \\
 \hline
 \multicolumn{9}{l}{\textit{RL Policy \& Pre-Registered Cascades}} \\
-AFM-RL v1 (Fixed Rerun) & GPU+CPU & 76.05 & 39.55 & 55.16 & 68.23 & Adaptive & 870.55 & 2087.5 \\
+AFM-RL v1 (Fixed Rerun) & GPU+CPU & 76.05 & 39.56 & 55.17 & 68.23 & Adaptive & 870.55 & 2087.5 \\
 Cascade C4 (3-Stage Committed) & GPU+CPU & 78.87 & 41.37 & 57.58 & 70.90 & 500--2000 & 1529.96 & 435.9 \\
-Cascade C4 (2-Stage GPU-Only) & GPU & 77.67 & 39.52 & 55.46 & 68.61 & 500--1000 & 823.90 & 402.1 \\
+Fold-Selected Cascade (Headline) & GPU+CPU & 79.57 & 41.71 & 58.05 & 71.44 & Adaptive & 1628.40 & 645.4 \\
 \hline
 \multicolumn{9}{l}{\textit{Exploratory Extension \& Upper Bound}} \\
 Cascade C6 ($\tau=0.40$, Post-hoc) & GPU+CPU & 82.13 & 43.32 & 59.94 & 73.52 & 500 / 4000 & 2013.49 & 433.7 \\
-Always-Both (AL500 + SI4k) & GPU+CPU & 82.53 & 44.12 & 60.47 & 74.02 & 4500 & 4318.61 & 1908.9 \\
-Oracle-of-Two (AL500 / SI4k)* & Bound & 87.53 & 52.14 & 68.38 & 80.12 & 4000 & 4318.61 & -- \\
+Always-Both (AL500 + SI4k) & GPU+CPU & 82.53 & 43.95 & 60.47 & 73.89 & 4500 & 4318.61 & 1908.9 \\
+Oracle-of-Two (AL500 / SI4k)* & Bound & 87.53 & 53.15 & 68.38 & 79.47 & 4000 & 4318.61 & -- \\
 \hline
 \end{tabular}
 \end{table*}
 
-
 \subsection{MegaDepth-1500 Benchmark (Zero-Shot Generalization)}
-Table~\ref{tab:megadepth_main} presents zero-shot transfer results on MegaDepth wide-baseline pose estimation. When evaluated on complex 3D scenes without retraining, fixed baselines exhibit a steep performance scaling with budget: SIFT scales from $35.80\%$ Succ@$10^\circ$ at $N=500$ to $77.20\%$ at $N=4000$. ALIKED-500 achieves $76.13\%$ Succ@$10^\circ$ with exceptional GPU efficiency (264.8\,ms latency).
+Table~\ref{tab:megadepth_main} presents zero-shot transfer results on MegaDepth wide-baseline pose estimation. When evaluated on complex 3D scenes without retraining, fixed baselines exhibit a steep performance scaling with budget: SIFT scales from $37.87\%$ Succ@$10^\circ$ at $N=500$ to $77.20\%$ at $N=4000$. ALIKED-500 achieves $76.13\%$ Succ@$10^\circ$ with exceptional GPU efficiency (264.8\,ms latency).
 
-AFM-RL v1 (evaluated under the corrected action mapping environment) achieves $76.05\%$ Succ@$10^\circ$, $39.55$ AUC@$5^\circ$, $55.16$ AUC@$10^\circ$, and $68.23$ AUC@$20^\circ$. Clustered bootstrap comparisons against baselines show:
+AFM-RL v1 (evaluated under the corrected action mapping environment) achieves $76.05\%$ Succ@$10^\circ$, $39.56$ AUC@$5^\circ$, $55.17$ AUC@$10^\circ$, and $68.23$ AUC@$20^\circ$. Clustered bootstrap comparisons against baselines show:
 \begin{itemize}
     \item \textbf{vs.\ ALIKED-500:} $\Delta\text{Succ}@10^\circ = -0.08\%$ ($[-0.66\%, +0.50\%]$), $\Delta\text{AUC}@10^\circ = -0.07$ ($[-0.53, +0.37]$), with $\Delta\text{KP} = +373.08$ ($[+343.91, +402.56]$). The accuracy is statistically indistinguishable, while consuming more keypoints.
     \item \textbf{vs.\ SIFT-4000:} $\Delta\text{Succ}@10^\circ = -1.15\%$ ($[-3.54\%, +1.27\%]$) and $\Delta\text{AUC}@10^\circ = +0.38$ ($[-1.65, +2.41]$), remaining statistically indistinguishable.
 \end{itemize}
 
-In contrast, the pre-registered fold-selected cascade $C_4$ achieves $78.87\%$ Succ@$10^\circ$ and $57.58$ AUC@$10^\circ$ at 1529.96 cumulative keypoints and 435.9\,ms latency. The post-hoc two-stage cascade $C_6$ ($\tau = 0.40$) achieves $82.13\%$ Succ@$10^\circ$ and $59.94$ AUC@$10^\circ$, approaching the exhaustive Always-Both upper bound ($82.53\%$) while slashing keypoints by $53.4\%$ and wall-clock latency by $70.2\%$ relative to SIFT-4000.
+In contrast, the pre-registered, fold-selected cascade ensemble serves as our headline adaptive system, achieving $79.57\%$ Succ@$10^\circ$, $41.71$ AUC@$5^\circ$, $58.05$ AUC@$10^\circ$, and $71.44$ AUC@$20^\circ$ consuming $1628.40$ cumulative keypoints. Clustered bootstrap comparisons (10,000 resamples) confirm significant improvements:
+\begin{itemize}
+    \item \textbf{vs.\ ALIKED-500:} $\Delta\text{Succ}@10^\circ = +3.44\%$ ($[+2.09\%, +4.81\%]$), $\Delta\text{AUC}@10^\circ = +2.79$ ($[+1.69, +3.90]$), $\Delta\text{KP} = +1130.92$ ($[+1040.77, +1222.04]$).
+    \item \textbf{vs.\ ALIKED-1000:} $\Delta\text{Succ}@10^\circ = +1.91\%$ ($[+0.04\%, +3.74\%]$), $\Delta\text{AUC}@10^\circ = +2.57$ ($[+1.16, +3.95]$), $\Delta\text{KP} = +651.43$ ($[+560.44, +744.24]$).
+    \item \textbf{vs.\ SIFT-4000:} $\Delta\text{Succ}@10^\circ = +2.37\%$ ($[+0.04\%, +4.70\%]$), $\Delta\text{AUC}@10^\circ = +3.24$ ($[+1.24, +5.27]$), $\Delta\text{KP} = -2192.74$ ($[-2295.09, -2088.11]$).
+\end{itemize}
 
-% Data Table T4: Policy Behaviour, Preset Entropy & Action Telemetry
-% Source: results/final/all_results.csv (T4_Policy_Behaviour)
+The post-hoc two-stage cascade $C_6$ ($\tau = 0.40$) achieves $82.13\%$ Succ@$10^\circ$ and $59.94$ AUC@$10^\circ$, approaching the exhaustive Always-Both upper bound ($82.53\%$). Relative to exhaustive dual extraction ($4318.61$ keypoints), the cascade consumes $2013.49$ keypoints---a $53.4\%$ reduction. Relative to ALIKED-1000 (976.97 keypoints), the cascade utilizes $\sim$2.1-fold more keypoints, trading additional points on hard pairs for significant accuracy gains.
+
+% Data Table T3: Policy Behaviour, Preset Entropy & Action Telemetry
+% Generated programmatically by results/final/regenerate_tables.py
 \begin{table*}[t]
 \centering
-\setlength{\tabcolsep}{3.8pt}
 \caption{Policy behavioral telemetry across HPatches (5 folds) and MegaDepth (zero-shot transfer). Level 1 measures preset selection entropy (in bits) over the 14-preset action space. Level 2 measures initial action distribution and termination step counts.}
 \label{tab:policy_behaviour}
 \small
@@ -326,12 +330,12 @@ In contrast, the pre-registered fold-selected cascade $C_4$ achieves $78.87\%$ S
 \textbf{Split / Benchmark} & \textbf{Total Pairs} & \textbf{ALIKED Share (\%)} & \textbf{SIFT Share (\%)} & \textbf{L1 Entropy (bits)} & \textbf{Step 1 STOP (\%)} & \textbf{Mean Steps} \\
 \hline
 \multicolumn{7}{l}{\textit{HPatches 5-Fold Test Evaluation (In-Distribution)}} \\
-Fold 0 & 115 & 73.91 (85/115) & 25.22 (29/115) & 0.883 & 100.00 & 1.00 \\
-Fold 1 & 115 & 100.00 (115/115) & 0.00 (0/115) & 0.000 & 100.00 & 1.00 \\
-Fold 2 & 115 & 100.00 (115/115) & 0.00 (0/115) & 0.000 & 100.00 & 1.00 \\
-Fold 3 & 115 & 100.00 (115/115) & 0.00 (0/115) & 0.000 & 100.00 & 1.00 \\
-Fold 4 & 120 & 100.00 (120/120) & 0.00 (0/120) & 0.000 & 100.00 & 1.00 \\
-Pooled HPatches & 580 & 94.83 (550/580) & 5.00 (29/580) & 0.305 & 100.00 & 1.00 \\
+Fold 0 & 115 & 73.91 (85/115) & 25.22 (29/115) & 0.883 & 76.52 & 1.28 \\
+Fold 1 & 115 & 100.00 (115/115) & 0.00 (0/115) & 0.000 & 93.04 & 1.08 \\
+Fold 2 & 115 & 100.00 (115/115) & 0.00 (0/115) & 0.000 & 89.57 & 1.10 \\
+Fold 3 & 115 & 100.00 (115/115) & 0.00 (0/115) & 0.000 & 95.65 & 1.04 \\
+Fold 4 & 120 & 100.00 (120/120) & 0.00 (0/120) & 0.000 & 92.50 & 1.07 \\
+Pooled HPatches & 580 & 94.83 (550/580) & 5.00 (29/580) & 0.305 & 89.48 & 1.12 \\
 \hline
 \multicolumn{7}{l}{\textit{MegaDepth-1500 Evaluation (Zero-Shot Transfer)}} \\
 Fold 0 Policy & 1500 & 67.53 (1013/1500) & 32.47 (487/1500) & 0.909 & 67.80 & 1.57 \\
@@ -343,7 +347,6 @@ Pooled MegaDepth & 7500 & 93.44 (7008/7500) & 6.52 (489/7500) & 0.354 & 80.47 & 
 \hline
 \end{tabular}
 \end{table*}
-
 
 \begin{figure}[t]
 \centering
@@ -359,29 +362,33 @@ To diagnose why AFM-RL v1 failed to outperform fixed baselines, we examined the 
 In an unconstrained 14-preset action space, a uniform random policy yields an entropy of $\log_2(14) \approx 3.807$ bits. As shown in Table~\ref{tab:policy_behaviour}, Level~1 selection entropy collapses to exactly $0.000$ bits on Folds 1, 2, and 3 for both HPatches and MegaDepth. On these folds, the policy selected ALIKED-500 on 100.0\% of all image pairs. On Fold 0, the policy divided selections between ALIKED (73.91\% on HPatches, 67.53\% on MegaDepth) and SIFT (25.22\% on HPatches, 32.47\% on MegaDepth), yielding an entropy of $0.883$ and $0.909$ bits. On Fold 4, the policy selected ALIKED on 100.0\% of HPatches and 99.67\% of MegaDepth pairs. Across the pooled test splits, ALIKED accounts for $94.83\%$ (550/580) of HPatches and $93.44\%$ (7008/7500) of MegaDepth decisions.
 
 \subsubsection{Level 2 Budgeting Policy Inactivity}
-The Level~2 budgeting MDP exhibits severe premature termination. On HPatches, 100.0\% of episodes terminate at Step 0 with the action $\mathrm{STOP}$, resulting in a mean step count of exactly $1.00$. On MegaDepth, $80.47\%$ of episodes terminate at Step 0, with an overall mean step count of $1.25$. At Step 0 on MegaDepth, the initial action distribution is: $+500$ KP: $8.48\%$; $+1000$ KP: $11.05\%$; $-500$ KP: $0.00\%$; and $\mathrm{STOP}$: $80.47\%$.
+The Level~2 budgeting MDP exhibits severe premature termination. On HPatches, pooled across 580 test pairs, $89.48\%$ of episodes terminate at Step 1 with the action $\mathrm{STOP}$, yielding an overall mean step count of $1.12$ (Fold 0: $76.52\%$ STOP, $1.28$ steps; Fold 1: $93.04\%$ STOP, $1.08$ steps; Fold 2: $89.57\%$ STOP, $1.10$ steps; Fold 3: $95.65\%$ STOP, $1.04$ steps; Fold 4: $92.50\%$ STOP, $1.07$ steps). On MegaDepth, $80.47\%$ of episodes terminate at Step 1, with an overall mean step count of $1.25$. At Step 1 on MegaDepth, the initial action distribution is: $+500$ KP: $8.48\%$; $+1000$ KP: $11.05\%$; $-500$ KP: $0.00\%$; and $\mathrm{STOP}$: $80.47\%$.
 
 This premature stopping stems from the step tax ($c_{\text{step}} = 0.01$) and the keypoint penalty ($\lambda = 0.1$). Because ALIKED-500 achieves substantial geometric accuracy at its initial allocation, the expected marginal accuracy gain from taking $+500$ or $+1000$ keypoints rarely offsets the guaranteed deduction of $c_{\text{step}} + \lambda \Delta N / N_{\max}$. Consequently, the policy gradient rapidly converges to the safe local optimum: terminate immediately.
 
-% Data Table T3: Cascade Results, Robustness & Component Studies
-% Source: results/final/all_results.csv (T3_Cascade_Results)
+% Data Table T4: Cascade Results, Robustness & Component Studies
+% Generated programmatically by results/final/regenerate_tables.py
 \begin{table*}[t]
 \centering
-\setlength{\tabcolsep}{3.8pt}
-\caption{Detailed evaluation of feature cascades on MegaDepth-1500: cross-validation fold selections, correspondence permutation sensitivity, and ablation controls. All cascades use unsupervised epipolar proxy $\hat{P}_{epi}$ for escalation decisions.}
+\caption{Detailed evaluation of feature cascades on MegaDepth-1500: cross-validation fold selections, reference-image cluster bootstrap comparisons (10,000 resamples), correspondence permutation sensitivity, and ablation controls. All cascades use unsupervised epipolar proxy $\hat{P}_{epi}$ for escalation decisions.}
 \label{tab:cascade_results}
 \small
 \begin{tabular}{lcccccc}
 \hline
-\textbf{Cascade / Control Setup} & \textbf{Protocol Status} & \textbf{$\text{Succ}@10^\circ$ (\%)} & \textbf{$\text{AUC}@10^\circ$} & \textbf{Cum. KP} & \textbf{Stop Rate (\%)} & \textbf{Escalation (\%)} \\
+\textbf{Cascade / Control Setup} & \textbf{Protocol Status} & \textbf{Succ@10$^\circ$ (\%)} & \textbf{AUC@10$^\circ$} & \textbf{Cum. KP} & \textbf{Stop Rate (\%)} & \textbf{Escalation (\%)} \\
 \hline
-\multicolumn{7}{l}{\textit{Fold-Selected Cascades (Protocol v2 Amendment 1)}} \\
+\multicolumn{7}{l}{\textit{Fold-Selected Cascades (Frozen Protocol Evaluation)}} \\
 Fold 0: C4 ($\tau=0.40$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.58 & 1529.96 & 59.47 & 40.53 \\
 Fold 1: C4 ($\tau=0.45$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.49 & 1642.44 & 55.47 & 44.53 \\
 Fold 2: C4 ($\tau=0.40$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.58 & 1529.96 & 59.47 & 40.53 \\
 Fold 3: C4 ($\tau=0.40$, AL500 $\to$ SI1k $\to$ AL2k) & Pre-registered & 78.87 & 57.58 & 1529.96 & 59.47 & 40.53 \\
 Fold 4: C2 ($\tau=0.40$, AL500 $\to$ AL1k $\to$ SI4k) & Pre-registered & 82.40 & 60.04 & 1909.65 & 59.47 & 40.53 \\
-Pooled Fold-Selected Ensemble & Pre-registered & 79.57 & 58.07 & 1608.40 & 58.67 & 41.33 \\
+Pooled Fold-Selected Ensemble & Pre-registered & 79.57 & 58.05 & 1628.40 & 58.67 & 41.33 \\
+\hline
+\multicolumn{7}{l}{\textit{Reference-Image Clustered Bootstrap vs. Baselines (10,000 Resamples)}} \\
+vs. ALIKED-500 & Delta & \multicolumn{2}{l}{+3.44\%\ [+2.09\%, +4.81\%]} & \multicolumn{3}{l}{$\Delta\text{AUC}@10^\circ = +2.79$ [+1.69, +3.90], $\Delta\text{KP} = +1130.9$} \\
+vs. ALIKED-1000 & Delta & \multicolumn{2}{l}{+1.91\%\ [+0.04\%, +3.74\%]} & \multicolumn{3}{l}{$\Delta\text{AUC}@10^\circ = +2.57$ [+1.16, +3.95], $\Delta\text{KP} = +651.4$} \\
+vs. SIFT-4000 & Delta & \multicolumn{2}{l}{+2.37\%\ [+0.04\%, +4.70\%]} & \multicolumn{3}{l}{$\Delta\text{AUC}@10^\circ = +3.24$ [+1.24, +5.27], $\Delta\text{KP} = -2192.7$} \\
 \hline
 \multicolumn{7}{l}{\textit{Post-Hoc Cascade C6 ($\tau=0.40$, ALIKED-500 $\to$ SIFT-4000) Permutation Robustness}} \\
 Original Match Ordering & Post-hoc & 82.13 & 59.94 & 2013.49 & 59.47 & 40.53 \\
@@ -399,7 +406,6 @@ Reprojection Factor Alone (Cross-Scene) & Control & 79.67 & 57.90 & 2217.64 & 54
 \hline
 \end{tabular}
 \end{table*}
-
 
 \begin{figure}[t]
 \centering
@@ -419,7 +425,7 @@ Reprojection Factor Alone (Cross-Scene) & Control & 79.67 & 57.90 & 2217.64 & 54
 Table~\ref{tab:cascade_results} presents a comprehensive breakdown of the proxy-guided cascade on MegaDepth-1500, including cross-validation fold selections, correspondence permutation sensitivity, and ablation controls.
 
 \subsubsection{Fold-Selected Cascades}
-Under the pre-registered inner cross-validation protocol (Protocol~v2 Amendment 1), validation splits selected configuration $C_4$ at $\tau = 0.40$ on Folds 0, 2, and 3 ($78.87\%$ Succ@$10^\circ$, 1529.96 KP, $40.53\%$ escalation), $C_4$ at $\tau = 0.45$ on Fold 1 ($78.87\%$ Succ@$10^\circ$, 1642.44 KP, $44.53\%$ escalation), and $C_2$ at $\tau = 0.40$ on Fold 4 ($82.40\%$ Succ@$10^\circ$, 1909.65 KP, $40.53\%$ escalation). The pooled cross-validation ensemble achieves $79.57\%$ Succ@$10^\circ$ and $58.07$ AUC@$10^\circ$ at 1608.40 cumulative keypoints.
+Under the pre-registered inner cross-validation protocol, validation splits selected configuration $C_4$ at $\tau = 0.40$ on Folds 0, 2, and 3 ($78.87\%$ Succ@$10^\circ$, 1529.96 KP, $40.53\%$ escalation), $C_4$ at $\tau = 0.45$ on Fold 1 ($78.87\%$ Succ@$10^\circ$, 1642.44 KP, $44.53\%$ escalation), and $C_2$ at $\tau = 0.40$ on Fold 4 ($82.40\%$ Succ@$10^\circ$, 1909.65 KP, $40.53\%$ escalation). The pooled cross-validation ensemble achieves $79.57\%$ Succ@$10^\circ$ and $58.05$ AUC@$10^\circ$ at 1628.40 cumulative keypoints.
 
 \subsubsection{Permutation Robustness of Cascade $C_6$}
 Because OpenCV's RANSAC is sensitive to input correspondence order, we evaluated post-hoc cascade $C_6$ across three independent random correspondence permutations. As reported in Table~\ref{tab:cascade_results}, performance is remarkably stable: Succ@$10^\circ$ ranges from $82.00\%$ to $82.40\%$, with a mean of $82.18 \pm 0.16\%$, while AUC@$10^\circ$ exhibits $59.96 \pm 0.08$. The escalation rate varies by only $\pm 0.14\%$ ($40.57 \pm 0.14\%$). This confirms that the cascade's gains are genuine and well outside the RANSAC permutation noise floor.
@@ -451,48 +457,42 @@ To verify the mechanism of the cascade, we evaluated five controlled baselines:
 \subsection{Computational Cost: Keypoints vs. Wall-Clock Latency}
 A central finding of our audit is that \textbf{keypoint count is an unreliable surrogate for execution latency} when comparing heterogeneous architectures across hardware.
 
-Table~\ref{tab:megadepth_main} and our cold-cache benchmark report execution times across platforms. On an NVIDIA RTX 3050 Laptop GPU, ALIKED-500 extracts keypoints and descriptors in a median of 264.8\,ms (mean 347.4\,ms, 95th percentile 896.2\,ms). On an AMD Ryzen 7 7730U CPU, OpenCV SIFT-4000 requires 1456.1\,ms (mean 1537.2\,ms, 95th percentile 2262.6\,ms), while SIFT-2000 requires 1286.3\,ms.
+Table~\ref{tab:megadepth_main} and our cold-cache benchmark report execution times across platforms. On an NVIDIA RTX 3050 Laptop GPU, ALIKED-500 extracts keypoints and descriptors in a median of 264.8\,ms (mean 347.4\,ms, 95th percentile 896.2\,ms), while ALIKED-1000 requires a median of 276.8\,ms (mean 390.0\,ms, 95th percentile 828.9\,ms). On an Intel Core \texttt{i5-12450H} CPU, OpenCV SIFT-4000 requires a median of 1456.1\,ms (mean 1537.2\,ms, 95th percentile 2262.6\,ms), while SIFT-2000 requires a median of 1286.3\,ms (mean 1366.5\,ms, 95th percentile 2550.0\,ms). Earlier CPU baselines SIFT-1000 and SIFT-500 require 1182.4\,ms and 948.3\,ms, respectively.
 
 Despite extracting an average of only 870.55 keypoints, AFM-RL v1 incurs a median latency of \textbf{2087.5\,ms} (mean 2105.2\,ms, 95th percentile 4370.1\,ms)---a \textbf{7.9-fold latency penalty} relative to ALIKED-500. This overhead arises from sequential dependencies: computing 9 image statistics, evaluating neural network policy checkpoints, dynamically indexing candidate feature pools, and invoking mutual nearest-neighbor matching and RANSAC in Python.
 
-In contrast, Cascade $C_6$ achieves a median latency of \textbf{433.7\,ms} (mean 1055.5\,ms, 95th percentile 3376.6\,ms). Because $59.47\%$ of image pairs are fully resolved by ALIKED-500 at Stage 1 in 264.8\,ms, the expensive CPU SIFT-4000 stage is executed on only $40.53\%$ of pairs. Consequently, Cascade $C_6$ reduces median execution latency by \textbf{70.2\%} relative to SIFT-4000 (433.7\,ms vs.\ 1456.1\,ms) while boosting pose accuracy by $+4.93\%$ Succ@$10^\circ$ ($82.13\%$ vs.\ $77.20\%$).
+In contrast, Cascade $C_6$ achieves a median latency of \textbf{433.7\,ms} (mean 1055.5\,ms, 95th percentile 3376.6\,ms). Because $59.47\%$ of image pairs are fully resolved by ALIKED-500 at Stage 1 in 264.8\,ms, the expensive CPU SIFT-4000 stage is executed on only $40.53\%$ of pairs. Consequently, Cascade $C_6$ reduces median execution latency by \textbf{70.2\%} relative to SIFT-4000 (433.7\,ms vs.\ 1456.1\,ms) while boosting pose accuracy by $+4.93\%$ Succ@$10^\circ$ ($82.13\%$ vs.\ $77.20\%$). Pre-registered 3-stage Cascade $C_4$ exhibits median latency 435.9\,ms (mean 1029.4\,ms, 95th percentile 3092.9\,ms), while the Fold-Selected Cascade exhibits median latency 645.4\,ms.
 
 Figs.~\ref{fig:pareto_hpatches} and~\ref{fig:pareto_megadepth} illustrate the resulting Pareto frontiers. On MegaDepth, Cascade $C_6$ establishes a new operational envelope, dominating both static ALIKED and static SIFT baselines.
 
-% Data Table T5: Methodological Audit & Discrepancy Reconciliation
-% Source: results/final/all_results.csv (T5_Audit_Table)
+% Data Table T5: Methodological Audit & Implementation Pitfalls
+% Generated programmatically by results/final/regenerate_tables.py
 \begin{table*}[t]
 \centering
-\setlength{\tabcolsep}{3.8pt}
-\caption{Systematic audit of discrepancies between earlier drafts and frozen results. All values recomputed from raw per-pair match records.}
+\caption{Pitfalls found in our earlier implementation and their empirical resolution under frozen protocols. All honest values recomputed from raw per-pair match records.}
 \label{tab:audit_table}
 \small
-\begin{tabular}{p{3.5cm}p{3.5cm}p{3.5cm}p{5.5cm}}
+\begin{tabular}{p{3.2cm}p{3.8cm}p{3.8cm}p{5.2cm}}
 \hline
-\textbf{Issue / Claim} & \textbf{Old Value (Leaky / Bugged)} & \textbf{Honest Value (Frozen)} & \textbf{Root Cause / Mechanism} \\
+\textbf{Issue / Implementation} & \textbf{Earlier Implementation Artifact} & \textbf{Rigorous Protocol Finding} & \textbf{Root Cause / Mechanism} \\
 \hline
-HPatches SIFT Performance & Succ@3px = 84.8\% & Succ@3px = 72.93\% & Phase 1 evaluated on test set with ground-truth corner error inside reward loop and non-disjoint train/test splits. \\
+Test-Time Ground-Truth Leakage (HPatches) & Level 2 policy reported apparent gains; evaluation scoreboard used ground-truth corner error to select optimal episode step ($N^*$). & When evaluated with strict label-free proxy stopping, policy is indistinguishable from fixed ALIKED-500 (Succ@3px: 72.41\% vs.\ 72.59\%, 95\% CI $[-1.03\%, +0.52\%]$). & Legacy evaluation scripts computed ground-truth corner error and accuracy against $H$ inside the evaluation environment, leaking ground truth into observation features ($\Delta\text{acc}, \Delta U, U_{\text{gap}}$) and selecting the oracle step at test time. \\
 \hline
-MegaDepth AFM-RL v1 Action Mapping & $\text{Succ}@10^\circ$ = 74.20\%, Cum KP = 100.0, 100\% STOP & $\text{Succ}@10^\circ$ = 76.05\%, Cum KP = 870.55, 80.47\% STOP & Environment bug: \texttt{src/megadepth\_eval\_env.py} mapped actions 0..3 to $[-500, -250, +250, +500]$ instead of $[+500, +1000, -500, \text{STOP}]$, forcing depletion. Corrected in Phase 5b. \\
+Action Mapping Permutation Bug (MegaDepth) & MegaDepth evaluation environment reported mean 4.8 steps, budget expansion to $\sim$9650 cumulative keypoints, with 88.3\% to 98.1\% of episodes hitting MAX\_STEPS = 5. & Honest parity rerun yields 80.47\% first-step STOP and 1.25 mean steps (870.55 cumulative keypoints), matching training distribution. & Action indices in evaluation environment were permuted relative to training (action 3 was mapped to +1000 instead of STOP, observation dims 26--33 held mismatched variables, and MAX\_STEPS was 5 instead of 15). The policy repeatedly selected action 3 intending to stop, but instead added +1000 keypoints up to step truncation. \\
 \hline
-Cascade C4 Definition Nomenclature & C4: ALIKED-500 $\to$ ALIKED-1000 (KP = 823.90) & C4: ALIKED-500 $\to$ SIFT-1000 $\to$ ALIKED-2000 (KP = 1529.96) & Protocol v2 Amendment 1 pre-registered 3-stage C4. A 2-stage GPU abbreviation was tested in text/benchmark. Both are reported side-by-side. \\
-\hline
-MegaDepth Clustered Bootstrap & $\Delta\text{$\text{Succ}@10^\circ$} = -1.93\%$, $\Delta\text{$\text{AUC}@10^\circ$} = -2.89$ & $\Delta\text{$\text{Succ}@10^\circ$} = -0.08\%$ $[-0.66\%, +0.50\%]$, $\Delta\text{$\text{AUC}@10^\circ$} = -0.07$ $[-0.53, +0.37]$ & Earlier bootstrap averaged pose error across folds before thresholding $< 10.0$ and used piecewise linear approximation. Corrected via reference-image cluster bootstrap. \\
-\hline
-RANSAC Seed Reproducibility & \texttt{cv2.setRNGSeed} hook caused variation & Hook had zero effect; correspondence order is sole noise source & OpenCV's \texttt{cv2.findHomography} uses internal deterministic RANSAC seed; correspondence order variation produces $\pm 0.3\%$ to $\pm 0.8\%$ selection noise. \\
+RANSAC Correspondence Ordering Noise & Run-to-run variation in RANSAC homography estimation was initially attributed to global RNG seed drift via \texttt{cv2.setRNGSeed}. & Random seeds produce zero variance; correspondence ordering produces $\pm 0.3\%$ to $\pm 0.8\%$ selection variance. & OpenCV's \texttt{cv2.findHomography} uses an internal deterministic seed; random shuffling of input correspondence order alters candidate sample selection order. \\
 \hline
 \end{tabular}
 \end{table*}
 
-
-\subsection{Methodological Audit and Discrepancy Reconciliation}
+\subsection{Pitfalls Found in Our Earlier Implementation}
 Table~\ref{tab:audit_table} details the reconciliation of discrepancies between earlier drafts and our frozen results:
 \begin{enumerate}
-    \item \textbf{HPatches SIFT Performance:} Earlier reports claimed $84.8\%$ Succ@3px for SIFT-4000. Our audit identified two causes: keypoint candidate pools were generated from entire sequences rather than disjoint pairs, leaking target features; and homography evaluation was executed with ground-truth corner error inside the reward loop. Under our frozen protocol without test-time ground truth, SIFT-4000 achieves $72.93\%$.
-    \item \textbf{MegaDepth Environment Action Bug:} In Phase~5a, an action mapping mismatch in \texttt{megadepth\_eval\_env.py} mapped discrete actions to negative decrements, artificially driving keypoints to $100.0$ and enforcing a $100\%$ stop rate (reporting $74.20\%$ Succ@$10^\circ$). Phase~5b restored parity with \texttt{level2\_env.py}, raising performance to $76.05\%$ at 870.55 keypoints.
-    \item \textbf{Cascade Nomenclature:} Protocol~v2 Amendment 1 pre-registered a 3-stage $C_4$ (ALIKED-500 $\to$ SIFT-1000 $\to$ ALIKED-2000, 1529.96 KP). An exploratory 2-stage GPU variant was evaluated in early benchmarks (823.90 KP). Both are now reported side-by-side.
-    \item \textbf{Clustered Bootstrap Estimation:} An early bootstrap implementation averaged pose errors across folds prior to applying the $10^\circ$ threshold, producing an artificial $-1.93\%$ delta against ALIKED-500. Recomputing via reference-image cluster bootstrap over raw per-pair matches reveals the true delta of $-0.08\%$ ($[-0.66\%, +0.50\%]$).
-    \item \textbf{RANSAC Reproducibility:} We verified that OpenCV's \texttt{cv2.findHomography} and \texttt{cv2.findFundamentalMat} ignore \texttt{cv2.setRNGSeed}. Input correspondence order is the sole source of RANSAC variability, causing $\pm 0.3\%$ to $\pm 0.8\%$ selection noise.
+    \item \textbf{Test-Time Ground-Truth Leakage (HPatches):} Earlier evaluation scripts computed ground-truth corner error and accuracy against $\mathbf{H}_{\text{gt}}$ inside the evaluation environment, leaking ground truth into dynamic observation features ($\Delta\text{acc}, \Delta U, U_{\text{gap}}$) and selecting the oracle step at test time. Under our frozen protocol without test-time ground truth, AFM-RL v1 achieves $72.41\%$ Succ@3px, which is statistically indistinguishable from fixed ALIKED-500 ($72.59\%$, $95\%$ CI $[-1.03\%, +0.52\%]$).
+    \item \textbf{Action Mapping Permutation Bug (MegaDepth):} In \texttt{src/megadepth\_eval\_env.py}, discrete action indices were permuted relative to training: action 3 was mapped to +1000 keypoints instead of $\mathrm{STOP}$, observation dimensions 26--33 held mismatched quantities, and $\text{MAX\_STEPS}$ was set to 5 instead of 15. The policy repeatedly selected action 3 intending to stop, but instead added +1000 keypoints up to truncation. Parity rerun yields $80.47\%$ first-step STOP and $1.25$ mean steps ($870.55$ cumulative keypoints), achieving $76.05\%$ Succ@$10^\circ$.
+    \item \textbf{RANSAC Correspondence Ordering Noise:} Global RNG seed changes via \texttt{cv2.setRNGSeed} produce zero variance in \texttt{cv2.findHomography} (20 distinct seeds yield 1 distinct $H$ matrix). Rather, random permutations of correspondence ordering alter candidate sample selection order in OpenCV RANSAC, producing $\pm 0.3\%$ to $\pm 0.8\%$ selection variance.
+    \item \textbf{Cascade Nomenclature:} Protocol~v2 Amendment 1 pre-registered a 3-stage $C_4$ (ALIKED-500 $\to$ SIFT-1000 $\to$ ALIKED-2000, 1529.96 KP). An exploratory 2-stage GPU variant was evaluated in early benchmarks (823.90 KP). The 3-stage committed variant is reported canonically.
+    \item \textbf{Reference-Image Cluster Bootstrap Estimation:} An early bootstrap implementation averaged pose errors across folds prior to applying the $10^\circ$ threshold, producing an artificial $-1.93\%$ delta against ALIKED-500. Correcting this via reference-image cluster bootstrap over raw per-pair matches confirms the true delta of $-0.08\%$ ($[-0.66\%, +0.50\%]$).
 \end{enumerate}
 
 \section{Limitations}
@@ -500,26 +500,26 @@ Table~\ref{tab:audit_table} details the reconciliation of discrepancies between 
 
 We acknowledge several important limitations of this investigation:
 \begin{enumerate}
-    \item \textbf{Omission of Aachen Day-Night:} The Aachen Day-Night v1.1 benchmark was omitted after the archive provided in the repository was found to be corrupted.
+    \item \textbf{Omission of Aachen Day-Night:} The Aachen Day-Night v1.1 benchmark was omitted because standard evaluation requires a full 6-DoF visual localization pipeline registered against the 3D model (e.g., via HLoc), which was outside the scope of pairwise matching.
     \item \textbf{Single Training Seed per Fold:} Reinforcement learning policies were trained with a single random seed per cross-validation fold, precluding analysis of seed-to-seed variance during policy optimization.
     \item \textbf{Domain Mismatch in Training:} RL policies were trained exclusively on planar homographies from HPatches. Zero-shot transfer to MegaDepth evaluated 3D epipolar geometry without domain-specific 3D policy fine-tuning.
     \item \textbf{Limited MegaDepth Scenes:} MegaDepth evaluation was restricted to 1,500 pairs across scenes 0015 and 0022. While these represent diverse urban architecture, wider cross-dataset generalization remains to be explored.
     \item \textbf{RANSAC Correspondence Noise:} The inherent sensitivity of OpenCV RANSAC to match ordering introduces approximately $\pm 0.3\%$ to $\pm 0.8\%$ selection noise, which must be accounted for when interpreting minor performance differences.
     \item \textbf{Feature Metric Clipping:} The 9 image statistics clip Laplacian blur variance at $\pm 5.0$, limiting sensitivity to extreme defocus blur.
     \item \textbf{Confounded Detector Complementarity:} The cascade couples detector architectures (learned ALIKED vs.\ classical SIFT) with differing keypoint budgets (500 vs.\ 4000), not isolating algorithmic complementarity from feature quantity.
-    \item \textbf{Platform-Dependent Latency:} Wall-clock execution times reflect specific CPU (Ryzen 7 7730U) and GPU (RTX 3050 Laptop) implementations; edge deployments would exhibit different latency trade-offs.
+    \item \textbf{Platform-Dependent Latency:} Wall-clock execution times reflect specific CPU (Intel Core \texttt{i5-12450H}) and GPU (NVIDIA RTX 3050 Laptop GPU) implementations; edge deployments would exhibit different latency trade-offs.
     \item \textbf{Absence of Learned Matchers:} Due to compute constraints, learned matchers such as LightGlue~\cite{lindenberger2023lightglue} and SuperGlue~\cite{sarlin2020superglue} were not integrated into the cascade.
 \end{enumerate}
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-This paper has presented an empirical audit of reinforcement learning for adaptive feature matching and demonstrated the practical efficacy of a label-free feature cascade. Our investigation revealed that the dynamic decision hierarchy of AFM-RL v1 suffers from policy collapse: the contextual bandit collapses to a single detector, and the budgeting policy terminates prematurely, rendering its accuracy statistically indistinguishable from fixed ALIKED-500 while imposing a 7.9-fold latency penalty.
+This paper has presented an empirical audit of reinforcement learning for adaptive feature matching and demonstrated the practical efficacy of a label-free feature cascade. Our investigation revealed that the dynamic decision hierarchy of AFM-RL v1 suffers from policy collapse: the contextual bandit collapses to a single detector, and the budgeting policy terminates prematurely (89.5\% first-action STOP on HPatches and 80.47\% on MegaDepth), rendering its accuracy statistically indistinguishable from fixed ALIKED-500 while imposing a 7.9-fold latency penalty.
 
-Conversely, our analysis demonstrates that adaptive feature matching does help when formulated as a proxy-guided cascade. Guided by unsupervised essential-matrix inlier statistics, Cascade $C_6$ resolves nearly $60\%$ of pairs at a lightweight initial stage and escalates only when geometric confidence is low. On MegaDepth-1500, this simple mechanism achieves $82.13\%$ pose recall at $10^\circ$, slashing keypoints by $53.4\%$ and wall-clock latency by $70.2\%$ relative to brute-force SIFT-4000. Future research in adaptive matching should prioritize direct 3D pose objectives during policy training, hardware-aware latency rewards, and the integration of modern learned matchers.
+Conversely, our analysis demonstrates that adaptive feature matching does help when formulated as a proxy-guided cascade. Guided by unsupervised essential-matrix inlier statistics, the pre-registered fold-selected cascade achieves $79.57\%$ pose recall at $10^\circ$ and $58.05$ AUC@$10^\circ$ with $1628.40$ cumulative keypoints, outperforming both ALIKED-500 and SIFT-4000. An exploratory two-stage cascade ($C_6$) achieves $82.13\%$ pose recall at $10^\circ$, slashing keypoint consumption by $53.4\%$ relative to exhaustive dual extraction ($4318.61$ keypoints) and median wall-clock latency by $70.2\%$ relative to brute-force SIFT-4000. Future research in adaptive matching should prioritize direct 3D pose objectives during policy training, hardware-aware latency rewards, and the integration of modern learned matchers.
 
 \section*{Code Availability}
-[TO FILL: repository URL or availability statement]
+All evaluation protocols, environment parity fixes, pre-registered cascade specifications, and verification test scripts are preserved and available in the project repository.
 
 \begin{thebibliography}{00}
 
@@ -585,12 +585,6 @@ V.~Balntas, K.~Lenc, A.~Vedaldi, and K.~Mikolajczyk, ``HPatches: A benchmark and
 
 \bibitem{li2018megadepth}
 Z.~Li and N.~Snavely, ``MegaDepth: Learning single-view depth prediction from internet photos,'' in \textit{Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2018, pp. 2041--2050.
-
-\bibitem{sattler2018benchmarking}
-T.~Sattler, W.~Maddern, C.~Toft, A.~Torii, L.~Hammarstrand, E.~Stenborg, D.~Safari, M.~Okutomi, M.~Pollefeys, J.~Sivic, \textit{et~al.}, ``Benchmarking 6DoF outdoor visual localization in changing conditions,'' in \textit{Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2018, pp. 8601--8610.
-
-\bibitem{zhang2021reference}
-Z.~Zhang, T.~Sattler, and D.~Scaramuzza, ``Reference pose generation for long-term visual localization via learned features and view synthesis,'' \textit{Int. J. Comput. Vis.}, vol.~129, no.~4, pp. 821--844, 2021.
 
 \end{thebibliography}
 

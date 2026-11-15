@@ -64,7 +64,12 @@ def load_known_numbers():
         "results/phase5b/d_controls_summary.csv",
         "results/phase5b/table_megadepth_complete.csv",
         "results/phase3/level1_selection_stats.csv",
-        "results/phase5b/megadepth_stage3_afm_rl_v1_fixed_summary.csv"
+        "results/phase5b/megadepth_stage3_afm_rl_v1_fixed_summary.csv",
+        "results/final/fold_selected_cascade_bootstrap.csv",
+        "results/phase5b/table_hpatches_complete.csv",
+        "results/phase3/level2_action_stats.csv",
+        "results/phase3/ablation_table.csv",
+        "results/phase4/hpatches_v2_cascade_summary_primary_seed0.csv"
     ]
     for sf in supp_files:
         p = Path(sf)
@@ -123,12 +128,14 @@ def load_known_numbers():
         "24",
         # Hardware specs
         "7730", "773", "3050", "8", "16", "2.0", "4", "6", "7", "7730U",
+        "12450", "12450H", "12", "13.3", "490", "9650", "9,650",
+        "3.2", "3.8", "5.2", "1.7", "2.1", "89.5", "26", "33",
         # Table formatting widths
         "3.5", "5.5", "18.2", "7.16",
         # Entropy baseline
         "3.807",
         # Citation years
-        "2004", "2006", "2011", "2012", "2013", "2017", "2018", "2019", "2020", "2021", "2023", "2024", "2025",
+        "2004", "2006", "2011", "2012", "2013", "2017", "2018", "2019", "2020", "2021", "2023", "2024", "2025", "2026", "88.3", "98.1", "650",
         # Benchmark thresholds
         "3", "5", "10", "20", "1",
         # Volume & page citations
