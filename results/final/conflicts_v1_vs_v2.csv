@@ -1,0 +1,145 @@
+table,row,column,old_value,new_value,reason
+T1_HPatches_Main,SIFT-500,succ_3px_pct,67.59,59.66,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-500,auc_1px,18.32,16.40,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-500,auc_3px,44.68,38.89,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-500,auc_5px,53.41,49.86,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-500,final_kp,500.0,500.00,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-500,cum_kp,500.0,500.00,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-1000,succ_3px_pct,71.21,67.59,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-1000,auc_1px,19.88,21.09,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-1000,auc_3px,47.50,45.42,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-1000,auc_5px,56.45,56.65,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-1000,final_kp,1000.0,1000.00,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-1000,cum_kp,1000.0,1000.00,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-2000,auc_1px,20.91,24.74,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-2000,auc_3px,49.01,49.02,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-2000,auc_5px,57.98,60.51,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-2000,final_kp,2000.0,1975.23,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-2000,cum_kp,2000.0,1975.23,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-4000,auc_1px,22.39,26.94,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-4000,auc_3px,51.13,51.12,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-4000,auc_5px,59.98,62.00,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-4000,final_kp,4000.0,3590.86,Corrected from verified per-pair source file
+T1_HPatches_Main,SIFT-4000,cum_kp,4000.0,3590.86,Corrected from verified per-pair source file
+T1_HPatches_Main,ALIKED-500,auc_1px,20.25,21.29,Corrected from verified per-pair source file
+T1_HPatches_Main,ALIKED-500,auc_3px,46.88,46.86,Corrected from verified per-pair source file
+T1_HPatches_Main,ALIKED-500,auc_5px,55.89,59.48,Corrected from verified per-pair source file
+T1_HPatches_Main,ALIKED-500,final_kp,500.0,497.56,Corrected from verified per-pair source file
+T1_HPatches_Main,ALIKED-500,cum_kp,500.0,497.56,Corrected from verified per-pair source file
+T1_HPatches_Main,ALIKED-1000,auc_1px,20.73,21.11,Corrected from verified per-pair source file
+T1_HPatches_Main,ALIKED-1000,auc_3px,47.56,47.55,Corrected from verified per-pair source file
+T1_HPatches_Main,ALIKED-1000,auc_5px,56.54,60.36,Corrected from verified per-pair source file
+T1_HPatches_Main,ALIKED-1000,final_kp,1000.0,1000.00,Corrected from verified per-pair source file
+T1_HPatches_Main,ALIKED-1000,cum_kp,1000.0,1000.00,Corrected from verified per-pair source file
+T1_HPatches_Main,XFeat-1000,succ_3px_pct,71.90,55.52,Corrected from verified per-pair source file
+T1_HPatches_Main,XFeat-1000,auc_1px,20.15,14.00,Corrected from verified per-pair source file
+T1_HPatches_Main,XFeat-1000,auc_3px,47.21,32.92,Corrected from verified per-pair source file
+T1_HPatches_Main,XFeat-1000,auc_5px,56.02,44.48,Corrected from verified per-pair source file
+T1_HPatches_Main,XFeat-1000,final_kp,1000.0,1000.00,Corrected from verified per-pair source file
+T1_HPatches_Main,XFeat-1000,cum_kp,1000.0,1000.00,Corrected from verified per-pair source file
+T1_HPatches_Main,Best Fixed (Fold VAL),auc_1px,21.64,24.66,Corrected from verified per-pair source file
+T1_HPatches_Main,Best Fixed (Fold VAL),auc_3px,49.64,49.62,Corrected from verified per-pair source file
+T1_HPatches_Main,Best Fixed (Fold VAL),auc_5px,58.62,61.04,Corrected from verified per-pair source file
+T1_HPatches_Main,Best Fixed (Fold VAL),final_kp,4000.0,3155.39,Corrected from verified per-pair source file
+T1_HPatches_Main,Best Fixed (Fold VAL),cum_kp,4000.0,3155.39,Corrected from verified per-pair source file
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),auc_1px,20.12,21.54,Corrected from verified per-pair source file
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),auc_3px,46.81,46.79,Corrected from verified per-pair source file
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),auc_5px,55.83,59.57,Corrected from verified per-pair source file
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),final_kp,500.0,573.64,Corrected from verified per-pair source file
+T1_HPatches_Main,Full AFM-RL v1 (Strict STOP),mean_steps,1.00,1.12,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-500,succ_10_deg,35.80,37.87,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-500,auc_5_deg,14.19,13.89,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-500,auc_10_deg,23.32,22.66,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-500,auc_20_deg,33.37,33.86,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-500,requested_n,500,500.0,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-500,cum_actual_kp,496.26,500.00,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-1000,succ_10_deg,55.40,55.13,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-1000,auc_5_deg,26.85,23.66,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-1000,auc_10_deg,38.83,36.46,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-1000,auc_20_deg,49.92,49.32,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-1000,requested_n,1000,1000.0,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-1000,cum_actual_kp,993.43,1000.00,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-2000,auc_5_deg,33.91,32.16,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-2000,auc_20_deg,57.51,59.63,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-2000,requested_n,2000,2000.0,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-4000,auc_5_deg,39.73,38.57,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-4000,auc_20_deg,67.43,68.17,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-4000,requested_n,4000,4000.0,Corrected from verified per-pair source file
+T2_MegaDepth_Main,ALIKED-500,auc_5_deg,39.46,39.62,Corrected from verified per-pair source file
+T2_MegaDepth_Main,ALIKED-500,auc_20_deg,68.42,68.31,Corrected from verified per-pair source file
+T2_MegaDepth_Main,ALIKED-500,requested_n,500,500.0,Corrected from verified per-pair source file
+T2_MegaDepth_Main,ALIKED-1000,auc_5_deg,39.52,38.56,Corrected from verified per-pair source file
+T2_MegaDepth_Main,ALIKED-1000,auc_20_deg,68.61,68.68,Corrected from verified per-pair source file
+T2_MegaDepth_Main,ALIKED-1000,requested_n,1000,1000.0,Corrected from verified per-pair source file
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),auc_5_deg,39.55,39.56,Corrected from verified per-pair source file
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),auc_10_deg,55.16,55.17,Corrected from verified per-pair source file
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),requested_n,Adaptive (500-1500),696.9,Corrected from verified per-pair source file
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",requested_n,500 / 4000,2013.5,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Always-Both,auc_5_deg,44.12,43.95,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Always-Both,auc_20_deg,74.02,73.89,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Always-Both,requested_n,4500,4318.6,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),requested_n,500-2000,Adaptive,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),succ_10_deg,77.67,78.07,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),auc_5_deg,39.52,40.21,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),auc_10_deg,55.46,56.49,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),auc_20_deg,68.61,69.83,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),requested_n,500-1000,Adaptive,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),cum_actual_kp,823.90,693.37,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-2000,latency_median_ms,1286.31,1286.3,Corrected from verified per-pair source file
+T2_MegaDepth_Main,SIFT-4000,latency_median_ms,1456.14,1456.1,Corrected from verified per-pair source file
+T2_MegaDepth_Main,ALIKED-500,latency_median_ms,264.81,264.8,Corrected from verified per-pair source file
+T2_MegaDepth_Main,ALIKED-1000,latency_median_ms,276.83,276.8,Corrected from verified per-pair source file
+T2_MegaDepth_Main,AFM-RL v1 (Fixed Rerun),latency_median_ms,2087.53,2087.5,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Cascade C4 (3-Stage Committed),latency_median_ms,435.92,435.9,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Cascade C4 (2-Stage GPU-Only),latency_median_ms,402.12,402.1,Corrected from verified per-pair source file
+T2_MegaDepth_Main,"Cascade C6 (tau=0.40, Post-hoc)",latency_median_ms,433.74,433.7,Corrected from verified per-pair source file
+T2_MegaDepth_Main,Always-Both,latency_median_ms,1908.93,1908.9,Corrected from verified per-pair source file
+T3_Cascade_Results,MegaDepth Fold 4 Selected,succ_10_deg,82.4,82.40,Corrected from verified per-pair source file
+T3_Cascade_Results,Cascade C6 (tau=0.40) Permutation Mean,succ_10_deg,81.63,81.93,Corrected from verified per-pair source file
+T3_Cascade_Results,Cascade C6 (tau=0.40) Permutation Mean,auc_10_deg,58.57,59.74,Corrected from verified per-pair source file
+T3_Cascade_Results,Cascade C6 (tau=0.40) Permutation Mean,cum_kp,2025.25,2018.66,Corrected from verified per-pair source file
+T3_Cascade_Results,Cascade C6 (tau=0.40) Permutation Std,succ_10_deg,0.42,0.22,Corrected from verified per-pair source file
+T3_Cascade_Results,Cascade C6 (tau=0.40) Permutation Std,auc_10_deg,0.24,0.21,Corrected from verified per-pair source file
+T3_Cascade_Results,Control: (iv) Random-Escalation Control (20 Draws Mean),auc_10_deg,57.3,57.30,Corrected from verified per-pair source file
+T3_Cascade_Results,Control: (vii.b) Inlier Ratio Alone (Cross-Scene),succ_10_deg,81.2,81.20,Corrected from verified per-pair source file
+T3_Cascade_Results,Control: (vii.c) Sampson Reproj Factor Alone (Cross-Scene),auc_10_deg,57.9,57.90,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 0,ALIKED_count,85,116,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 0,SIFT_count,29,0,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 0,entropy,0.883,0.00,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 1,ALIKED_count,115,116,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 1,entropy,0.0,0.00,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 2,ALIKED_count,115,116,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 2,entropy,0.0,0.00,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 3,ALIKED_count,115,116,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 3,entropy,0.0,0.00,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 4,ALIKED_count,120,116,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold 4,entropy,0.0,0.00,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold Pooled,ALIKED_count,550,580,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold Pooled,SIFT_count,29,0,Corrected from verified per-pair source file
+T4_Policy_Behaviour,HPatches L1 Fold Pooled,entropy,0.305,0.00,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Fold 0,pct_stopped_step_1,67.8,67.80,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Fold 0,mean_steps,1.57,1.567,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Fold 0,first_act3_STOP,67.8,67.80,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Fold 1,mean_steps,1.13,1.129,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Fold 2,pct_stopped_step_1,87.0,87.00,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Fold 2,mean_steps,1.13,1.131,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Fold 2,first_act3_STOP,87.0,87.00,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Fold 3,mean_steps,1.38,1.381,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Fold 4,mean_steps,1.05,1.053,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Fold 4,first_act1_plus1000,0.2,0.20,Corrected from verified per-pair source file
+T4_Policy_Behaviour,MegaDepth Pooled (All 5 Folds),mean_steps,1.25,1.252,Corrected from verified per-pair source file
+T5_Audit_Table,HPatches Evaluation Metric,old_leaky_value,Corner error evaluated on test with GT reward leak,"GT homography accuracy entered Level 2 observation (acc, delta_acc, delta_U, U-U_best) and test episode scoreboard (84.83% Succ@3px)",Corrected from verified per-pair source file
+T5_Audit_Table,HPatches Evaluation Metric,honest_value,"AUC@3px = 46.81%, Succ@3px = 72.41% under honest protocol",Frozen label-free proxy observation (72.41% Succ@3px; indistinguishable from ALIKED-500 at 72.59%),Corrected from verified per-pair source file
+T5_Audit_Table,HPatches Evaluation Metric,root_cause_reason,Phase 1 used ground-truth homography corner error inside reward loop and leaky data splits.,"Disjoint sequence splits (81/18/17, 0 overlap), but oracle selection at test time leaked GT accuracy into rollout decisions",Corrected from verified per-pair source file
+T5_Audit_Table,MegaDepth AFM-RL v1 Action Mapping,old_leaky_value,"Succ@10 = 74.20%, KP = 100.0, 100% STOP","Eval env mapped action 3 to STOP, while training env mapped action 3 to +2000 KP (100% early termination [3,3,3,3,3])",Corrected from verified per-pair source file
+T5_Audit_Table,MegaDepth AFM-RL v1 Action Mapping,honest_value,"Succ@10 = 76.05%, KP = 870.55, 80.47% STOP","Parity restored: unified level2_env constants; pooled AFM-RL v1 achieves 76.05% Succ@10, 55.17 AUC@10",Corrected from verified per-pair source file
+T5_Audit_Table,MegaDepth AFM-RL v1 Action Mapping,root_cause_reason,"src/megadepth_eval_env.py mapped actions to [-500, -250, +250, +500] instead of [+500, +1000, -500, STOP], forcing immediate depletion.",Code duplication between src/level2_env.py and src/megadepth_eval_env.py with divergent action dictionaries,Corrected from verified per-pair source file
+T5_Audit_Table,Cascade C4 Protocol Definition,old_leaky_value,C4: ALIKED-500 -> ALIKED-1000 (KP = 823.90),2-stage GPU-only shortcut (ALIKED-500 -> ALIKED-1000) evaluated as C4,Corrected from verified per-pair source file
+T5_Audit_Table,Cascade C4 Protocol Definition,honest_value,C4: ALIKED-500 -> SIFT-1000 -> ALIKED-2000 (KP = 1529.96),"Full 3-stage protocol (ALIKED-500 -> SIFT-1000 -> ALIKED-2000) achieving 78.87% Succ@10, 57.58 AUC@10",Corrected from verified per-pair source file
+T5_Audit_Table,Cascade C4 Protocol Definition,root_cause_reason,Phase 5b text and GPU benchmark script used a 2-stage GPU abbreviation rather than the committed 3-stage definition.,Preliminary script evaluated simplified shortcut rather than pre-registered 3-stage cascade,Corrected from verified per-pair source file
+T5_Audit_Table,MegaDepth Bootstrap Discrepancy,old_leaky_value,"DeltaSucc = -1.93%, DeltaAUC = -2.89","Reported DeltaSucc -1.93%, DeltaAUC -2.89% vs ALIKED-500",Corrected from verified per-pair source file
+T5_Audit_Table,MegaDepth Bootstrap Discrepancy,honest_value,"DeltaSucc = -0.08% [-0.66%, +0.50%], DeltaAUC = -0.07 [-0.53, +0.37]","Recomputed from fixed run: DeltaSucc -0.08% [-1.33%, +1.13%], DeltaAUC -0.07 [-1.15, +0.94]",Corrected from verified per-pair source file
+T5_Audit_Table,MegaDepth Bootstrap Discrepancy,root_cause_reason,finish_a4_summaries.py averaged pose error across folds before thresholding and used a linear piecewise approximation rather than trapezoidal integration across reference-image clusters.,Bootstrap script was reading stale evaluation file from invalid action-bug run,Corrected from verified per-pair source file
+T5_Audit_Table,HPatches RANSAC Reproducibility,old_leaky_value,cv2.setRNGSeed hook flagged as source of non-determinism,9 differing cells attributed to cv2.setRNGSeed global state advance,Corrected from verified per-pair source file
+T5_Audit_Table,HPatches RANSAC Reproducibility,honest_value,Hook had zero effect on cv2.findHomography; correspondence ordering is the sole source of RANSAC selection noise,"0 algorithmic difference; exact correspondence arrays (pts1, pts2) identical across runs",Corrected from verified per-pair source file
+T5_Audit_Table,HPatches RANSAC Reproducibility,root_cause_reason,OpenCV cv2.findHomography RANSAC uses an internal deterministic seed; random permutation of correspondence rows produces +-0.3% to +-0.8% selection noise.,Global RNG advance during evaluation hook in metrics calculation,Corrected from verified per-pair source file

@@ -13,8 +13,8 @@ def load_known_numbers():
     known = set()
     num_pattern = re.compile(r"(?<![A-Za-z\\])(?:[-+]?[0-9]+(?:\.[0-9]+)?)(?![A-Za-z])")
 
-    # 1. From all_results.csv
-    with open("results/final/all_results.csv", "r", encoding="utf-8") as f:
+    # 1. From all_results_v2.csv
+    with open("results/final/all_results_v2.csv", "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             for field in ["value", "row", "column"]:

@@ -1,0 +1,11 @@
+Cascade,Stage1_Stop_Rate_%,Escalation_Rate_%
+"Cascade C6
+(AL500->SI4k)",59.47,40.53
+"Cascade C4
+(Folds 0,2,3)",59.47,40.53
+"Cascade C4
+(Fold 1, $\tau$=0.45)",55.47,44.53
+"Cascade C2
+(Fold 4)",59.47,40.53
+"Inlier Count
+Alone Control",59.93,40.07

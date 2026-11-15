@@ -1,0 +1,11 @@
+Method,Cum_KP,Succ@3px,CI_low,CI_high
+SIFT-500,500.0,59.66,,
+SIFT-1000,1000.0,67.59,,
+SIFT-2000,1975.23,72.76,,
+SIFT-4000,3590.86,72.93,,
+ALIKED-500,497.56,72.59,,
+XFeat-1000,1000.0,55.52,,
+Full AFM-RL v1,1215.38,72.41,68.63,75.87
+Best Fixed (VAL),3155.39,73.97,,
+Oracle Preset Bound*,4000.0,80.69,,
+Proxy-Guided Cascade,920.69,76.21,,
