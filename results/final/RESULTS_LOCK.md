@@ -60,7 +60,7 @@ This document locks all empirical results intended for the final manuscript. In 
 
 ### Item 3: MegaDepth Fold-Selected Cascades (Protocol v2 Amendment 1)
 - **Status:** `PRE-REGISTERED`
-- **Pre-dating Git Commit:** `ea23a38` (2026-11-14 22:14:33 +0530)
+- **Pre-dating Git Commit:** `00a48d7` (2026-11-14 08:16:24 +0530) [first commit of Amendment 1; Protocol v2 Final was committed in `06ca299` at 2026-11-14 02:00:06 +0530]
 - **Committed Protocol File:** `results/phase4b/PROTOCOL_v2_AMENDMENT_1.md`
 - **Primary Data Sources:**
   - `results/phase5b/c2_fold_selected_cascades_summary.csv`
@@ -80,7 +80,7 @@ This document locks all empirical results intended for the final manuscript. In 
 
 ### Item 4: Cascade C6 ($\tau=0.40$) Hybrid Escalation
 - **Status:** `POST-HOC (Exploratory Extension)`
-- **Pre-dating Protocol:** Amendment 1 added C6 (`ALIKED-500 -> SIFT-4000`) to the candidate set; threshold $\tau=0.40$ was selected after inspecting HPatches utility curves.
+- **Pre-dating Protocol:** Candidate $C_6$ (`ALIKED-500 -> SIFT-4000`) was pre-registered in `06ca299` (`PROTOCOL_v2_FINAL.md`, 2026-11-14 02:00:06 +0530) and `00a48d7` (`PROTOCOL_v2_AMENDMENT_1.md`, 2026-11-14 08:16:24 +0530). However, evaluating $C_6$ specifically at fixed $\tau=0.40$ across all 1,500 pairs of MegaDepth is **POST-HOC** because inner cross-validation selected $C_4$ and $C_2$, not $C_6$.
 - **Primary Data Sources:**
   - `results/phase4b/megadepth_stage2a_priority_evaluations.csv`
   - `results/phase5b/b2_permutation_robustness_all_pairs.csv` (Row 17)
