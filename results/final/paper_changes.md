@@ -178,3 +178,15 @@ This document records all modifications made to `paper/afm_rl_paper.tex` during 
   > Referenced corrupt archive for Aachen, Ryzen CPU.
 - **New Text:**
   > Updated to reflect: Aachen visual localization 3D model requirement, Intel Core i5-12450H CPU, single-seed policy training, and exact cascade metrics.
+
+---
+
+## 14. Overleaf Compilation Fix (LaTeX Syntax)
+- **Problem:**
+  Lines 247--250 in Table 1 had unescaped `%` symbols inside the bootstrap confidence interval brackets (`[-5.34%, +1.90%]`, `[-1.03%, +0.52%]`, `[-4.48%, +3.45%]`, `[-4.66%, +3.28%]`). When parsed by TeX, `%` initiated a comment, truncating the rest of each row and commenting out the closing brace `}` of `\multicolumn{2}{l}{...}`. This triggered:
+  `Runaway argument?`
+  `Emergency stop.`
+- **Resolution:**
+  Updated `results/final/regenerate_tables.py` and `paper/afm_rl_paper.tex` to escape every `%` as `\%` inside all confidence interval strings.
+  Zero unescaped `%` remain in the document. Brace balance across the entire document is verified: 838 open braces, 838 close braces (net balance: 0).
+
